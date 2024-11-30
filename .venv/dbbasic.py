@@ -29,6 +29,11 @@ def DataBaseInit(name):
     create_table_Reservations(connection)
     create_table_Offers(connection)
     return connection
+#print tabela
+def printresult(result):
+    for result in result:
+        print(result)
+
 
 
 #robots create
@@ -195,6 +200,12 @@ def RgetQWhere(conn, col,value,):
         res = execute(conn,"select count(robot_id) from (select robot_id from Robots where "+col+"="+str(value))
 
     return res.fetchone()[0]
+
+#wyczyszczenie tabeli Robots
+def ClearRobots(conn):
+    for i in range(RgetQuantity(conn)):
+        DeleteRobot(conn,i)
+
 
 def insertAvailability(conn, robot_id, status, end_date, price):
     execute(conn, "insert into Availability values("+str(nextid(conn, "Availability"))+", "+str(robot_id)+", '"+status+"', "+end_date+ ", "+str(price)+") ")
