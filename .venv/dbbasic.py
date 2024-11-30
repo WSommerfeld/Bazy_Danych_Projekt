@@ -128,6 +128,7 @@ def insertRobots(conn, model, type, warranty_number):
 
 #oblicznie id
 def nextid(conn,table):
+    #można to udprawnić o cofanie numerów ale nwm czy jest sens
     if(table == "Robots"):
         if(select(conn,"count(robot_id)",table)[0][0]>0):
             id = select(conn, "max(robot_id)", table)[0][0]+1
