@@ -1,4 +1,3 @@
-print("hello world")
-print("lol lmao")
-print("lol lmao")
 
+def lollmao():
+    print("lol lmao")
