@@ -3,7 +3,7 @@ import random
 import dbbasic as db
 from dbbasic import insertRobots, execute, select
 
-con=db.connect("baza1.db")
+con=db.connect("DATA.db")
 
 
 
