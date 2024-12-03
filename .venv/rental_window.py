@@ -57,8 +57,34 @@ class RentalWindow:
         rental_duration = self.rental_duration_entry.get()
         price = self.price_entry.get()
 
+        #Walidacja danych
         if not (robot_id and first_name and last_name and rental_duration and price):
             messagebox.showerror("Błąd", "Wszystkie pola muszą być wypełnione.")
+            return
+
+
+        #Walidacja imenia i nazwiska
+        if not first_name.isalpha() or not last_name.isalpha():
+            messagebox.showerror("Błąd", "Imię i nazwisko muszą zawierać tylko litery.")
+            return
+
+
+        # Walidacja ceny - musi być liczbą dodatnią
+        try:
+            price = float(price)
+            if price <= 0:
+                raise ValueError("Cena musi być dodatnia.")
+        except ValueError as e:
+            messagebox.showerror("Błąd", f"Niepoprawna cena: {e}")
+            return
+
+        # Walidacja czasu trwania wypożyczenia - musi być liczbą dodatnią
+        try:
+            rental_duration = int(rental_duration)
+            if rental_duration <= 0:
+                raise ValueError("Czas trwania wypożyczenia musi być dodatnią liczbą dni.")
+        except ValueError as e:
+            messagebox.showerror("Błąd", f"Niepoprawny czas trwania wypożyczenia: {e}")
             return
 
         try:

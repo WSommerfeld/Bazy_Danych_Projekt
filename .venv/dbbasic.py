@@ -29,8 +29,18 @@ def get_robot_types(conn):
             return []  
     except sqlite3.OperationalError as e:
         print("Error retrieving robot types:", e)
-        return []  
+        return []
 
+def update_robot(conn, robot_id, new_model, new_type):
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE Robots SET model = ?, type = ? WHERE id = ?",
+            (new_model, new_type, robot_id)
+        )
+        conn.commit()
+    except sqlite3.OperationalError as e:
+        print("Error updating robot:", e)
 
 
 
@@ -38,27 +48,73 @@ def get_robot_types(conn):
 #SQLite nie obsluguje float zamiastr tego jest REAL
 
 def create_table_Robots(conn):
-    execute(conn, "CREATE TABLE IF NOT EXISTS Robots (robot_id INTEGER, model VARCHAR(50), type VARCHAR(50), serial_number VARCHAR(50), warranty_number VARCHAR(50))")
+    execute(conn, "CREATE TABLE IF NOT EXISTS Robots ("
+                  "robot_id INTEGER, "
+                  "model VARCHAR(50), "
+                  "type VARCHAR(50), "
+                  "serial_number VARCHAR(50), "
+                  "warranty_number VARCHAR(50))")
     conn.commit()
 
 def create_table_Functionalities(conn):
-    execute(conn, "CREATE TABLE IF NOT EXISTS Functionalities (functionality_id INTEGER PRIMARY KEY, model VARCHAR(50), functionality VARCHAR(100))")
+    execute(conn, "CREATE TABLE IF NOT EXISTS Functionalities ("
+                  "functionality_id INTEGER PRIMARY KEY, "
+                  "model VARCHAR(50), "
+                  "functionality VARCHAR(100))")
     conn.commit()
 
 def create_table_Availability(conn):
-    execute(conn, "CREATE TABLE IF NOT EXISTS Availability (availability_id INTEGER PRIMARY KEY, robot_id INTEGER, status VARCHAR(50), end_date DATE, price REAL)")
+    execute(conn, "CREATE TABLE IF NOT EXISTS Availability ("
+                  "availability_id INTEGER PRIMARY KEY, "
+                  "robot_id INTEGER, "
+                  "status VARCHAR(50), "
+                  "end_date DATE, "
+                  "price REAL)")
     conn.commit()
 
 def create_table_Users(conn):
-    execute(conn, "CREATE TABLE IF NOT EXISTS Users (user_login VARCHAR(50) PRIMARY KEY, email VARCHAR(100), first_name VARCHAR(50), last_name VARCHAR(50), password_hash VARCHAR(255))")
+    execute(conn, "CREATE TABLE IF NOT EXISTS Users ("
+                  "user_login VARCHAR(50) PRIMARY KEY, "
+                  "email VARCHAR(100), "
+                  "first_name VARCHAR(50), "
+                  "last_name VARCHAR(50), "
+                  "password_hash VARCHAR(255), "
+                  "role VARCHAR(20) DEFAULT 'user')")
     conn.commit()
 
+def add_role_column_to_users(conn):
+    try:
+        execute(conn, "ALTER TABLE Users ADD COLUMN role VARCHAR(50) DEFAULT 'user'")
+    except sqlite3.OperationalError as e:
+        print("Błąd podczas dodawania kolumny:", e)
+
+
+def update_user_roles(conn):
+    try:
+        execute(conn, "UPDATE Users SET role = 'user' WHERE role IS NULL")  # Przypisanie domyślnej roli dla istniejących użytkowników
+    except sqlite3.OperationalError as e:
+        print("Błąd podczas aktualizacji ról:", e)
+
 def create_table_Offers(conn):
-    execute(conn, "CREATE TABLE IF NOT EXISTS Offers (offer_id INTEGER PRIMARY KEY, model VARCHAR(50), available_quantity INTEGER, type VARCHAR(50), rental_price REAL)")
+    execute(conn, "CREATE TABLE IF NOT EXISTS Offers ("
+                  "offer_id INTEGER PRIMARY KEY, "
+                  "model VARCHAR(50), "
+                  "available_quantity INTEGER, "
+                  "type VARCHAR(50), "
+                  "rental_price REAL)")
     conn.commit()
 
 def create_table_Reservations(conn):
-    execute(conn, "CREATE TABLE IF NOT EXISTS Reservations (reservation_id INTEGER PRIMARY KEY, customer_first_name VARCHAR(50), customer_last_name VARCHAR(50), customer_login VARCHAR(50), payment_status VARCHAR(50), robot_id INTEGER, start_date DATE, end_date DATE, income REAL)")
+    execute(conn, "CREATE TABLE IF NOT EXISTS Reservations ("
+                  "reservation_id INTEGER PRIMARY KEY, "
+                  "customer_first_name VARCHAR(50), "
+                  "customer_last_name VARCHAR(50), "
+                  "customer_login VARCHAR(50), "
+                  "payment_status VARCHAR(50), "
+                  "robot_id INTEGER, "
+                  "start_date DATE, "
+                  "end_date DATE, "
+                  "income REAL)")
     conn.commit()
 
 
