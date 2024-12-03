@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 import dbbasic as db
+from rental_window import RentalWindow
+
+
+
 
 # Funkcja uruchamiająca GUI
 def start_gui():
@@ -62,40 +66,13 @@ class RobotRentalApp:
             messagebox.showinfo("Dostępne roboty", robot_list)
         else:
             messagebox.showinfo("Dostępne roboty", "Brak dostępnych robotów w bazie.")
+    
+    
 
     def rent_robot(self):
-        # Proces wypożyczenia robota
-        cur = self.conn.cursor()
-        cur.execute("SELECT robot_id, model, type FROM Robots WHERE robot_id NOT IN (SELECT robot_id FROM Reservations)")
-        available_robots = cur.fetchall()
+        RentalWindow(self.root, self.conn)  # Switch to the rental window
 
-        if available_robots:
-            # Wybierz robota
-            robot_list = "\n".join([f"{r[0]}: {r[1]} ({r[2]})" for r in available_robots])
-            robot_id = simpledialog.askinteger(
-                "Wypożycz robota", f"Wybierz ID robota do wypożyczenia:\n\n{robot_list}"
-            )
 
-            # Jeśli robot został wybrany
-            if robot_id:
-                # Pobierz dane klienta
-                customer_name = simpledialog.askstring("Dane klienta", "Podaj imię klienta:")
-                customer_last_name = simpledialog.askstring("Dane klienta", "Podaj nazwisko klienta:")
-
-                if customer_name and customer_last_name:
-                    # Wstaw dane do tabeli Rezerwacje
-                    try:
-                        cur.execute(
-                            "INSERT INTO Reservations (customer_first_name, customer_last_name, robot_id, payment_status, start_date, end_date, income) "
-                            "VALUES (?, ?, ?, 'unpaid', DATE('now'), DATE('now', '+7 day'), 1000)",
-                            (customer_name, customer_last_name, robot_id),
-                        )
-                        self.conn.commit()
-                        messagebox.showinfo("Wypożyczanie robota", "Robot został wypożyczony!")
-                    except Exception as e:
-                        messagebox.showerror("Błąd", f"Nie udało się wypożyczyć robota: {e}")
-        else:
-            messagebox.showinfo("Wypożyczanie robota", "Brak dostępnych robotów.")
 
     def manage_reservations(self):
         # Zarządzanie rezerwacjami
