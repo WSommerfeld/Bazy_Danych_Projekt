@@ -1,8 +1,10 @@
 
 import dbbasic as db
+import GUI
 from dbbasic import insertRobots, execute, select
 
-con=db.connect("baza1.db")
+con=db.connect("DATA.db")
+GUI.start_gui()
 #db.create_table_Robots(con)
 #db.create_table_Availability(con)
 #db.execute(con,"lol lmao")
