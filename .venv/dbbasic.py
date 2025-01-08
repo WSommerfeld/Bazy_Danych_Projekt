@@ -200,6 +200,19 @@ def insertAvailability(conn, robot_id, status, end_date, price):
     execute(conn, "insert into Availability values("+str(nextid(conn, "Availability"))+", "+str(robot_id)+", '"+status+"', "+end_date+ ", "+str(price)+") ")
 
 
+def get_robot_types(conn):
+    try:
+        cur = conn.cursor()
+        # zapytanie zeby dostac typy robotow
+        cur.execute("SELECT DISTINCT type FROM Robots")
+        types = cur.fetchall()
+        if types:
+            return [robot_type[0] for robot_type in types]
+        else:
+            return []
+    except sqlite3.OperationalError as e:
+        print("Error retrieving robot types:", e)
+        return []
 
 
 
