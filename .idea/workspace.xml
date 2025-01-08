@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="53c7b037-80f4-4479-9d04-2baa2efa89f4" name="Changes" comment="11">
-      <change beforePath="$PROJECT_DIR$/.venv/dbbasic.py" beforeDir="false" afterPath="$PROJECT_DIR$/.venv/dbbasic.py" afterDir="false" />
-    </list>
+    <list default="true" id="53c7b037-80f4-4479-9d04-2baa2efa89f4" name="Changes" comment="11" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -49,7 +47,7 @@
     "Python.main.executor": "Run",
     "Python.test1.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Marcin",
+    "git-widget-placeholder": "master",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
