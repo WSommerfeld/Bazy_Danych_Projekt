@@ -3,6 +3,7 @@ from tkinter import messagebox, simpledialog
 import dbbasic as db
 from rental_window import RentalWindow
 import bcrypt
+import sqlite3
 
 
 
