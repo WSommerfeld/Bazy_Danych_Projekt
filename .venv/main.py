@@ -1,8 +1,8 @@
 import GUI
 import dbbasic as db
 
-
-con=db.connect("test1.db")
+DATA_BASE = "data_base.db"
+con=db.connect(DATA_BASE)
 db.create_table_Robots(con)
 db.create_table_Availability(con)
 db.create_table_Offers(con)
