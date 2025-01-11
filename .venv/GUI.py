@@ -5,8 +5,7 @@ from rental_window import RentalWindow
 import bcrypt
 import sqlite3
 
-
-
+DATA_BASE = "data_base.db"
 
 # Funkcja uruchamiająca GUI
 def start_gui():
@@ -30,7 +29,7 @@ class RobotRentalApp:
         self.root = root
         self.root.title("Robot Rental Agency")
         self.root.geometry("600x400")
-        self.conn = db.connect("test1.db")  # Połączenie z bazą danych
+        self.conn = db.connect(DATA_BASE)  # Połączenie z bazą danych
         self.create_widgets()
 
     def create_widgets(self):
@@ -113,8 +112,10 @@ class RobotRentalApp:
             try:
                 # Wstawiamy dane użytkownika do bazy
                 cur.execute(
-                    "INSERT INTO Users (user_login, first_name, last_name, password_hash, role) VALUES (?, ?, ?, ?, ?)",
-                    (login, first_name, last_name, hashed_password, role))
+                    "INSERT INTO Users (login, first_name, last_name, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+                    (login, first_name, last_name, hashed_password, role)
+                )
+
                 self.conn.commit()
                 messagebox.showinfo("Sukces", "Użytkownik został zarejestrowany!")
                 register_window.destroy()
@@ -148,8 +149,9 @@ class RobotRentalApp:
 
             # Sprawdzamy w bazie, czy użytkownik istnieje i czy hasło jest poprawne
             cur = self.conn.cursor()
-            cur.execute("SELECT password_hash, role FROM Users WHERE user_login = ?", (login,))
+            cur.execute("SELECT password_hash, role FROM Users WHERE login = ?", (login,))
             user = cur.fetchone()
+
 
             if user:
                 stored_password_hash = user[0]
@@ -177,17 +179,35 @@ class RobotRentalApp:
 
 
     def display_robot_types(self):
-        # Pobieranie typów robotów z bazy danych
-        robot_types = db.get_robot_types(self.conn)
-        if robot_types:
-            messagebox.showinfo("Typy robotów", "\n".join(robot_types))
-        else:
-            messagebox.showinfo("Typy robotów", "Brak danych o typach robotów w bazie.")
+        try:
+            cur = self.conn.cursor()
+            
+            
+            cur.execute("SELECT DISTINCT type FROM Models")
+            robot_types = cur.fetchall()
+            
+        
+            if robot_types:
+                types_list = [row[0] for row in robot_types]
+                messagebox.showinfo("Typy robotów", "\n".join(types_list))
+            else:
+                messagebox.showinfo("Typy robotów", "Brak danych o typach robotów w bazie.")
+        except sqlite3.Error as e:
+        
+            messagebox.showerror("Błąd bazy danych", f"Wystąpił błąd: {e}")
 
     def show_available_robots(self):
         # Pobieranie dostępnych robotów
         cur = self.conn.cursor()
-        cur.execute("SELECT robot_id, model, type FROM Robots")
+        cur.execute(
+            """
+            SELECT Robots.id, Robots.serial_number, Models.name AS model, Models.type 
+            FROM Robots 
+            INNER JOIN Models ON Robots.model_id = Models.id
+            """
+        )
+
+
         robots = cur.fetchall()
         if robots:
             robot_list = "\n".join([f"ID: {r[0]}, Model: {r[1]}, Typ: {r[2]}" for r in robots])
@@ -225,7 +245,16 @@ class RobotRentalApp:
 
         # Pobieramy dane robota z bazy danych
         cur = self.conn.cursor()
-        cur.execute("SELECT robot_id, model, type FROM Robots WHERE robot_id = ?", (robot_id,))
+        cur.execute(
+            """
+            SELECT Robots.id, Models.name AS model_name, Models.type 
+            FROM Robots 
+            INNER JOIN Models ON Robots.model_id = Models.id 
+            WHERE Robots.id = ?
+            """,
+            (robot_id,)
+        )
+
         robot = cur.fetchone()
 
         if not robot:

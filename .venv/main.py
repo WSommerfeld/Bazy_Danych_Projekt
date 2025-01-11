@@ -1,15 +1,13 @@
-
-import dbbasic as db
 import GUI
-from dbbasic import insertRobots, execute, select
+import dbbasic as db
 
-con=db.connect("test1.db")
+DATA_BASE = "data_base.db"
+con=db.connect(DATA_BASE)
+db.create_table_Robots(con)
+db.create_table_Availability(con)
+db.create_table_Offers(con)
+db.create_table_Functionalities(con)
+db.create_table_Reservations(con)
+db.create_table_Users(con)
+db.execute(con,"PRINT DISTINCT type FROM Robots")
 GUI.start_gui()
-#db.create_table_Robots(con)
-#db.create_table_Availability(con)
-#db.execute(con,"lol lmao")
-#db.execute(con, "insert into robots values(12345, 'model1', 'typ1', '54321', '12543')")
-
-
-
-
