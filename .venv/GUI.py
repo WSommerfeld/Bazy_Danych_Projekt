@@ -5,7 +5,7 @@ from rental_window import RentalWindow
 import bcrypt
 import sqlite3
 
-DATA_BASE = "test4.db"
+DATA_BASE = "test6.db"
 
 # Funkcja uruchamiająca GUI
 def start_gui():
@@ -83,6 +83,10 @@ class RobotRentalApp:
         login_entry = tk.Entry(register_window)
         login_entry.pack(pady=10)
 
+        tk.Label(register_window, text="Email: ").pack(pady=10)
+        email_entry = tk.Entry(register_window)
+        email_entry.pack(pady=10)
+
         tk.Label(register_window, text="Imię: ").pack(pady=10)
         first_name_entry = tk.Entry(register_window)
         first_name_entry.pack(pady=10)
@@ -97,6 +101,7 @@ class RobotRentalApp:
 
         def register():
             login = login_entry.get()
+            email=email_entry.get()
             first_name = first_name_entry.get()
             last_name = last_name_entry.get()
             password = password_entry.get()
@@ -114,9 +119,11 @@ class RobotRentalApp:
             cur = self.conn.cursor()
             try:
                 # Wstawiamy dane użytkownika do bazy
+                ID=db.execute(self.conn,"SELECT COUNT(id) FROM USERS").fetchone()[0]+1
                 cur.execute(
-                    "INSERT INTO Users (login, first_name, last_name, password_hash, role) VALUES (?, ?, ?, ?, ?)",
-                    (login, first_name, last_name, hashed_password, role)
+                    "INSERT INTO Users (id,login, email, first_name, last_name, password_hash, role) VALUES ("
+                    "?, ?, ?, ?, ?, ?, ?)",
+                    (ID, login, email, first_name, last_name, hashed_password, role)
                 )
 
                 self.conn.commit()

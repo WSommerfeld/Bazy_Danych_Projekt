@@ -4,7 +4,7 @@ import dbbasic as db
 from login_screen import LoginScreen
 from GUI import RobotRentalApp
 
-DATA_BASE = "data_base.db"
+DATA_BASE = "test6.db"
 
 def main():
     # Połączenie bazowe do weryfikacji logowania
