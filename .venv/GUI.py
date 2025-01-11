@@ -25,8 +25,10 @@ def check_password(stored_hash, password):
 
 # Klasa GUI
 class RobotRentalApp:
-    def __init__(self, root):
+    def __init__(self, root,db_connection, is_admin):
         self.root = root
+        self.conn = db_connection
+        self.is_admin = is_admin  # Informacja o roli użytkownika
         self.root.title("Robot Rental Agency")
         self.root.geometry("600x400")
         self.conn = db.connect(DATA_BASE)  # Połączenie z bazą danych
@@ -61,16 +63,17 @@ class RobotRentalApp:
         self.entry_button = tk.Button(self.root, text = "Zarejestruj się", command = self.register_user)
         self.entry_button.pack(pady=10)
 
-        self.manage_users_button = tk.Button(
-            self.root, text="Zarządzaj użytkownikami", command=self.manage_users
-        )
-        self.manage_users_button.pack(pady=10)
+         # Funkcje tylko dla administratorów
+        if self.is_admin:
+            self.manage_users_button = tk.Button(
+                self.root, text="Zarządzaj użytkownikami", command=self.manage_users
+            )
+            self.manage_users_button.pack(pady=10)
 
-        # Przycisk do edytowania robota
-        self.edit_robot_button = tk.Button(
-            self.root, text="Edytuj robota", command=self.edit_robot
-        )
-        self.edit_robot_button.pack(pady=10)
+            self.edit_robot_button = tk.Button(
+                self.root, text="Edytuj robota", command=self.edit_robot
+            )
+            self.edit_robot_button.pack(pady=10)
 
     def register_user(self):
         register_window = tk.Toplevel(self.root)
@@ -232,7 +235,7 @@ class RobotRentalApp:
 
     def edit_robot(self):
         # Sprawdzamy, czy użytkownik ma rolę admin
-        if not getattr(self, "admin_role", False):
+        if not getattr(self, "is_admin", False):
             messagebox.showerror("Brak uprawnień", "Tylko administratorzy mogą edytować roboty.")
             return
 
