@@ -10,13 +10,6 @@ def main():
     # Połączenie bazowe do weryfikacji logowania
     base_connection = db.connect(DATA_BASE)
     
-    # Tworzenie wymaganych tabel w bazie danych (jeśli jeszcze nie istnieją)
-    db.create_table_Robots(base_connection)
-    db.create_table_Availability(base_connection)
-    db.create_table_Offers(base_connection)
-    db.create_table_Functionalities(base_connection)
-    db.create_table_Reservations(base_connection)
-    db.create_table_Users(base_connection)
 
     def on_login_success(role):
         """
@@ -43,8 +36,10 @@ def main():
         app = RobotRentalApp(root, user_connection, role == "admin")  # Przekazanie is_admin
         root.mainloop()
 
+
     # Uruchomienie ekranu logowania
     login_root = tk.Tk()
+    
     login_screen = LoginScreen(login_root, base_connection, on_login_success)
     login_root.mainloop()
 

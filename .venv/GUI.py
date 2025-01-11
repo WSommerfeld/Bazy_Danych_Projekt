@@ -235,7 +235,7 @@ class RobotRentalApp:
 
     def edit_robot(self):
         # Sprawdzamy, czy użytkownik ma rolę admin
-        if not getattr(self, "admin_role", False):
+        if not getattr(self, "is_admin", False):
             messagebox.showerror("Brak uprawnień", "Tylko administratorzy mogą edytować roboty.")
             return
 

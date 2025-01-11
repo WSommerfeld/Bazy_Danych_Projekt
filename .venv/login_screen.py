@@ -2,6 +2,21 @@ import tkinter as tk
 from tkinter import messagebox
 import bcrypt
 
+
+
+"""
+
+HASLA I LOGINY
+
+login: johndoe, password: password1,
+login: janedoe, password: password2,
+login: smithj, password: password3,
+login: admin, password: admin
+
+
+"""
+
+
 class LoginScreen:
     def __init__(self, root,db_connection, on_login_success):
         
@@ -51,15 +66,19 @@ class LoginScreen:
         if user:
             stored_password_hash, role = user # Rozpakowywanie danych
             
-            #Konwersja hasla na bajty aby moc je zweryfikowac
-            stored_password_hash = stored_password_hash.encode('utf-8')
+            if isinstance(stored_password_hash, str):
+                stored_password_hash = stored_password_hash.encode("utf-8")
+
 
 
             # Weryfikacja hasła
             if bcrypt.checkpw(password.encode("utf-8"), stored_password_hash):
                 messagebox.showinfo("Sukces", f"Zalogowano jako {role}.")
+                print("Przed usunieciem")
+                self.root.withdraw()  # Zamknięcie okna logowania
                 self.on_login_success(role)  # Przekazanie roli do głównego programu
-                self.root.destroy()  # Zamknięcie okna logowania
+                
+                print("Okno usuniete")
             else:
                 messagebox.showerror("Błąd", "Niepoprawne hasło.")
         else:
