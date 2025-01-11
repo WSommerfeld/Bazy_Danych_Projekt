@@ -5,7 +5,7 @@ from rental_window import RentalWindow
 import bcrypt
 import sqlite3
 
-DATA_BASE = "data_base.db"
+DATA_BASE = "test4.db"
 
 # Funkcja uruchamiająca GUI
 def start_gui():

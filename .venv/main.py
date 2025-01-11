@@ -1,12 +1,7 @@
 import GUI
 import dbbasic as db
 
-DATA_BASE = "data_base13.db"
-con=db.connect(DATA_BASE)
-
-db.create_table_Models(con)
+db.DataBaseInit('test5.db')
 
 
-
-
-#GUI.start_gui()
+GUI.start_gui()
