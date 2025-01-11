@@ -11,23 +11,25 @@ def execute(conn, query):
         cur = conn.cursor()
         result = cur.execute(query)
         conn.commit()
+
+
     except sqlite3.OperationalError as e1:
         if "syntax error" in e1.args[0]:
             print("Błąd w zapytaniu")
         if "already exists" in e1.args[0]:
             print("Tabela już istnieje!")
-
     return result
+
 
 #utworzenie bazy
 def DataBaseInit(name):
     connection = connect(name)
+    create_table_Models(connection)
+    create_table_Robots(connection)
     create_table_Availability(connection)
     create_table_Functionalities(connection)
-    create_table_Robots(connection)
     create_table_Users(connection)
     create_table_Reservations(connection)
-    create_table_Offers(connection)
     return connection
 #print tabela
 def printresult(result):
@@ -36,58 +38,58 @@ def printresult(result):
 
 
 
+def create_table_Models(conn):
+    execute(conn, "CREATE TABLE Models"
+                  "(id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                  "name VARCHAR(50) NOT NULL,"
+                  "type VARCHAR(50) NOT NULL CHECK(type IN('Type1', 'Type2', 'Type3'))")
+
 #robots create
 def create_table_Robots(conn):
     execute(conn,"CREATE TABLE Robots"
-                 " (robot_id INTEGER PRIMARY KEY,"
-                 " model VARCHAR(50) NOT NULL, "
-                 "type VARCHAR(50) NOT NULL,"
+                 " (id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                 " model_id INTEGER NOT NULL, "
                  " serial_number VARCHAR(50) UNIQUE NOT NULL,"
-                 " warranty_number VARCHAR(50) NOT NULL)")
+                 " warranty_number VARCHAR(50),"
+                 " FOREIGN KEY (model_id) REFERENCES Models(id) ")
 
 
 #Availability create
 def create_table_Availability(conn):
-    execute(conn, "CREATE TABLE Availability(availability_id INTEGER PRIMARY KEY, "
-                  "robot_id INTEGER,"
-                  " status VARCHAR(50) NOT NULL,"
+    execute(conn, "CREATE TABLE Availability(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                  "robot_id INTEGER NOT NULL, "
+                  " status VARCHAR(50) NOT NULL CHECK (status IN ('Available', 'Unavailable', 'Reserved')),"
                   " end_date DATE, "
-                  "price DECIMAL(10, 2),"
+                  "price DECIMAL(10, 2) NOT NULL,"
                   " FOREIGN KEY (robot_id) REFERENCES Robots(robot_id))")
 
 #Functionalities create
 def create_table_Functionalities(conn):
-    execute(conn,"CREATE TABLE Functionalities (functionality_id INTEGER PRIMARY KEY, "
-                 "model VARCHAR(50) NOT NULL, functionality VARCHAR(100) NOT NULL)")
+    execute(conn,"CREATE TABLE Functionalities "
+                 "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                 "model_id INTEGER NOT NULL,"
+                 " name VARCHAR(50) NOT NULL,"
+                 "FOREIGN KEY (model_id) REFERENCES Models(id) ")
 
 #Offers
-def create_table_Offers(conn):
-    execute(conn,"CREATE TABLE Offers "
-                 "(offer_id INTEGER PRIMARY KEY, "
-                 "model VARCHAR(50) NOT NULL, "
-                 "available_quantity INTEGER NOT NULL,"
-                 " type VARCHAR(50) NOT NULL,"
-                 " rental_price DECIMAL(10, 2) NOT NULL)")
 
 #Reservations
 def create_table_Reservations(conn):
     execute(conn,"CREATE TABLE Reservations "
-                 "(reservation_id INTEGER PRIMARY KEY, "
-                 " customer_first_name VARCHAR(50) NOT NULL,"
-                 " customer_last_name VARCHAR(50) NOT NULL,"
-                 " customer_login VARCHAR(50),"
-                 "payment_status VARCHAR(50) NOT NULL, "
-                 " robot_id INTEGER,"
+                 "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                 " customer_id INTEGER NOT NULL, "
+                 " robot_id INTEGER NOT NULL,"
+                 " payment_status VARCHAR(50) NOT NULL CHECK (payment_status IN ('Paid', 'Pending', 'Failed')),"
                  "start_date DATE NOT NULL,"
                  "end_date DATE NOT NULL,"
-                 "income DECIMAL(10, 2),"
-                 "FOREIGN KEY (customer_login) REFERENCES Users(user_login),"
-                 "FOREIGN KEY (robot_id) REFERENCES Robots(robot_id))")
+                 "FOREIGN KEY (customer_ID) REFERENCES Users(id),"
+                 "FOREIGN KEY (robot_id) REFERENCES Robots(id))")
 
 #Users
 def create_table_Users(conn):
     execute(conn,"CREATE TABLE Users "
-                 "(user_login VARCHAR(50) PRIMARY KEY,"
+                 "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                 "login VARCHAR(50) PRIMARY KEY,"
                  "email VARCHAR(100) UNIQUE NOT NULL,"
                  "first_name VARCHAR(50) NOT NULL,"
                  "last_name VARCHAR(50) NOT NULL,"
