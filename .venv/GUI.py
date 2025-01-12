@@ -4,6 +4,7 @@ import dbbasic as db
 from rental_window import RentalWindow
 import bcrypt
 import sqlite3
+import importlib
 
 DATA_BASE = "test6.db"
 
@@ -56,12 +57,11 @@ class RobotRentalApp:
         )
         self.manage_reservations_button.pack(pady=10)
 
-        # Przycisk logowania
-        self.login_button = tk.Button(self.root, text="Zaloguj się", command=self.login)
-        self.login_button.pack(pady=10)
 
         self.entry_button = tk.Button(self.root, text = "Zarejestruj się", command = self.register_user)
         self.entry_button.pack(pady=10)
+
+
 
          # Funkcje tylko dla administratorów
         if self.is_admin:
@@ -74,6 +74,21 @@ class RobotRentalApp:
                 self.root, text="Edytuj robota", command=self.edit_robot
             )
             self.edit_robot_button.pack(pady=10)
+
+        #przycisk wylogowania
+        self.logout_button = tk.Button(self.root, text="Wyloguj się", command=self.logout
+        )
+        self.logout_button.pack(pady=10)
+
+
+    def logout(self):
+        print("Logging out...")
+        self.__del__()
+        self.root.destroy()
+        import entry
+        entry.entry()
+
+
 
     def register_user(self):
         register_window = tk.Toplevel(self.root)
@@ -136,56 +151,6 @@ class RobotRentalApp:
 
         register_button = tk.Button(register_window, text="Zarejestruj", command=register)
         register_button.pack(pady=10)
-
-    def login(self):
-        login_window = tk.Toplevel(self.root)
-        login_window.title("Logowanie")
-
-        tk.Label(login_window, text = "Login: ").pack(pady=10)
-        login_entry = tk.Entry(login_window)
-        login_entry.pack(pady=10)
-
-        tk.Label(login_window, text = "Haslo: ").pack(pady=10)
-        password_entry = tk.Entry(login_window)
-        password_entry.pack(pady=10)
-
-        def authenticate():
-            login = login_entry.get()
-            password = password_entry.get()
-
-            if not login or not password:
-                messagebox.showerror("Błąd", "Proszę podać login i hasło.")
-                return
-
-            # Sprawdzamy w bazie, czy użytkownik istnieje i czy hasło jest poprawne
-            cur = self.conn.cursor()
-            cur.execute("SELECT password_hash, role FROM Users WHERE login = ?", (login,))
-            user = cur.fetchone()
-
-
-            if user:
-                stored_password_hash = user[0]
-                role = user[1]
-
-                # Porównanie hasła
-                if check_password(stored_password_hash, password):
-                    messagebox.showinfo("Sukces", f"Zalogowano jako {role}.")
-                    login_window.destroy()
-
-                    if role == "admin":
-                        self.admin_role = True  # Ustawiamy flagę, że użytkownik ma uprawnienia administratora
-                    else:
-                        self.admin_role = False  # Zwykły użytkownik
-
-                    return
-                else:
-                    messagebox.showerror("Błąd", "Niepoprawne hasło.")
-            else:
-                messagebox.showerror("Błąd", "Użytkownik o podanym loginie nie istnieje.")
-
-        login_button = tk.Button(login_window, text="Zaloguj", command=authenticate)
-        login_button.pack(pady=10)
-
 
 
     def display_robot_types(self):
@@ -302,10 +267,36 @@ class RobotRentalApp:
 
             try:
                 # Zapisujemy zmiany w bazie danych
-                cur.execute("UPDATE Robots SET model = ?, type = ? WHERE robot_id = ?", (new_model, new_type, robot_id))
-                self.conn.commit()
-                messagebox.showinfo("Sukces", "Dane robota zostały zaktualizowane.")
-                edit_window.destroy()  # Zamknięcie okna edycji
+                #zmiany ~Lasak
+                #aktualne działanie: jeśli wpiszemy model, który już istnieje w bazie, pole typ robota
+                #zostanie zignorowane i robot o zadanym id dostanie model_id które już istnieje w bazie
+                #oraz typ odpowiadający temu model_id
+                #w przypadku braku nazwy modelu w bazie, do tabeli models zostanie dodany nowy
+                #model o zadanym typie (w ograniczeniu industrial, household, garden)
+
+                #model jest w bazie
+                if(db.execute(self.conn,"SELECT COUNT(name) FROM models WHERE name = '"+new_model+"'").fetchone()[0]>0):
+                    print("stary")
+                    #id wprowadzonego modelu
+                    model_id=db.execute(self.conn,"SELECT id FROM models WHERE name = '"+new_model+"'").fetchone()[0]
+
+                    db.execute(self.conn,"UPDATE Robots SET model_id = '"+str(model_id)+"' WHERE id = '"+str(robot_id)+"'")
+
+                    messagebox.showinfo("Sukces", "Dane robota zostały zaktualizowane.")
+                    edit_window.destroy()  # Zamknięcie okna edycji
+                else:
+                    #id nowego modelu
+                    print("nowy")
+                    new_id = db.execute(self.conn,"SELECT COUNT(id) FROM Models").fetchone()[0] + 1
+
+                    db.execute(self.conn,"INSERT INTO models (id, name, type)"
+                                         " VALUES("+str(new_id)+", '"+str(new_model)+"', '"+str(new_type)+"')")
+
+                    db.execute(self.conn, "UPDATE Robots SET model_id = '"+str(new_id)+"' WHERE id = '"+str(robot_id)+"'")
+
+                    messagebox.showinfo("Sukces", "Dane robota zostały zaktualizowane. Dodano nowy model.")
+                    edit_window.destroy()  # Zamknięcie okna edycji
+
             except Exception as e:
                 messagebox.showerror("Błąd", f"Nie udało się zaktualizować danych robota: {e}")
 
