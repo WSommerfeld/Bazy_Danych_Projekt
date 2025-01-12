@@ -6,7 +6,7 @@ import bcrypt
 import sqlite3
 import importlib
 
-DATA_BASE = "test6.db"
+DATA_BASE = "test7.db"
 
 # Funkcja uruchamiająca GUI
 def start_gui():
@@ -43,7 +43,7 @@ class RobotRentalApp:
         self.robot_types_button.pack(pady=10)
 
         self.available_robots_button = tk.Button(
-            self.root, text="Pokaż dostępne roboty", command=self.show_available_robots
+            self.root, text="Pokaż wszystkie roboty", command=self.show_available_robots
         )
         self.available_robots_button.pack(pady=10)
 

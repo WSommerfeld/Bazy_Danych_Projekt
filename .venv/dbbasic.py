@@ -30,6 +30,7 @@ def DataBaseInit(name):
     create_table_Availability(connection)
     create_table_Functionalities(connection)
     create_table_Users(connection)
+    create_table_Customers(connection)
     create_table_Reservations(connection)
     return connection
 #print tabela
@@ -82,7 +83,7 @@ def create_table_Reservations(conn):
                  " payment_status VARCHAR(50) NOT NULL CHECK (payment_status IN ('Paid', 'Pending', 'Failed')),"
                  "start_date DATE NOT NULL,"
                  "end_date DATE NOT NULL,"
-                 "FOREIGN KEY (customer_ID) REFERENCES Users(id),"
+                 "FOREIGN KEY (customer_ID) REFERENCES Customers(id),"
                  "FOREIGN KEY (robot_id) REFERENCES Robots(id))")
 
 #Users
@@ -96,7 +97,15 @@ def create_table_Users(conn):
                  "password_hash VARCHAR(255) NOT NULL,"
                  "role VARCHAR(50) NOT NULL)")
 
-
+#propozycja dodania tabeli klientów
+#wtedy trzeba zmienić foreign key w rezerwacjach
+def create_table_Customers(conn):
+    execute(conn,"CREATE TABLE Customers "
+                 "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                 "email VARCHAR(100) UNIQUE NOT NULL,"
+                 "telephone VARCHAR(50) UNIQUE NOT NULL,"
+                 "first_name VARCHAR(50) NOT NULL,"
+                 "last_name VARCHAR(50) NOT NULL)")
 #select
 def select(conn, col, table):
     cur = conn.cursor()

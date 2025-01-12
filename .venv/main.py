@@ -5,10 +5,10 @@ from login_screen import LoginScreen
 from GUI import RobotRentalApp
 import entry
 
-DATA_BASE = "test6.db"
+DATA_BASE = "test7.db"
 
 def main():
-
+    #db.DataBaseInit(DATA_BASE)
 
     entry.entry()
 
