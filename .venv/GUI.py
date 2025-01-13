@@ -33,7 +33,14 @@ class RobotRentalApp:
         self.root.title("Robot Rental Agency")
         self.root.geometry("600x400")
         self.conn = db.connect(DATA_BASE)  # Połączenie z bazą danych
+        self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.create_widgets()
+
+    # Zamykanie okna (nie działa nadal do końca)
+    def close(self):
+        print("close")
+        self.__del__()
+        self.root.destroy()
 
     def create_widgets(self):
         # Menu główne
@@ -134,7 +141,7 @@ class RobotRentalApp:
             cur = self.conn.cursor()
             try:
                 # Wstawiamy dane użytkownika do bazy
-                ID=db.execute(self.conn,"SELECT COUNT(id) FROM USERS").fetchone()[0]+1
+                ID=db.execute(self.conn,"SELECT MAX(id) FROM USERS").fetchone()[0]+1
                 cur.execute(
                     "INSERT INTO Users (id,login, email, first_name, last_name, password_hash, role) VALUES ("
                     "?, ?, ?, ?, ?, ?, ?)",
@@ -193,7 +200,7 @@ class RobotRentalApp:
     
 
     def rent_robot(self):
-        RentalWindow(self.root, self.conn)  # Switch to the rental window
+        RentalWindow(self.root, self.conn,self.is_admin)  # Switch to the rental window
 
 
 
