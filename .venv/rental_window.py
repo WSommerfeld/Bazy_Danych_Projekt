@@ -88,14 +88,14 @@ class RentalWindow:
         cur_date=self.cal.get_date()
         cur_date = datetime.datetime.strptime(cur_date, '%m/%d/%y')
         cur_date=datetime.date.strftime(cur_date, "%Y-%m-%d")
-        #tu trzeba poprawić żeby prawidłowo sprawdzało czy nie nachodzi na inne rezerwacje ale już zasypiam
+        
         cur.execute("SELECT Robots.id, Models.name, Models.type FROM Robots"
             " INNER JOIN Models ON Robots.model_id=Models.id"
             " WHERE Robots.id IN (SELECT robot_id FROM Reservations WHERE "
-            " end_date < '"+str(cur_date)+"' OR DATE('"+str(cur_date)+"', '"+str(duration)+" day'))"
+            " end_date < '"+str(cur_date)+"' OR DATE('"+str(cur_date)+"', '"+str(duration)+" day')<start_date)"
             "OR Robots.id NOT IN (SELECT robot_id FROM Reservations) ")
         self.available_robots = cur.fetchall()
-        print(cur.fetchall())
+
         #próba odświeżenia
         robot_options = [f"{r[0]}: {r[1]} ({r[2]})" for r in self.available_robots]
         self.robot_var.set(robot_options[0] if robot_options else "Brak dostępnych robotów")
@@ -103,7 +103,7 @@ class RentalWindow:
         menu.delete(0, "end")
         for option in robot_options:
             menu.add_command(label=option, command=lambda value=option: self.robot_var.set(value))
-        #trzeba to jakoś odświeżyć ale za cholerę nie wiem jak
+
 
     #Cofnięcie się do głównego menu
     def back(self):
