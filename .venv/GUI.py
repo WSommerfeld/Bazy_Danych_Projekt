@@ -206,6 +206,7 @@ class RobotRentalApp:
 
     def manage_reservations(self):
         # Zarządzanie rezerwacjami
+        #trzeba ustalić ostatecznie zmiany z availability i cenami i można rzeźbić
         messagebox.showinfo("Zarządzaj rezerwacjami", "brak.")
 
     def manage_users(self):

@@ -88,7 +88,7 @@ class RentalWindow:
         cur_date=self.cal.get_date()
         cur_date = datetime.datetime.strptime(cur_date, '%m/%d/%y')
         cur_date=datetime.date.strftime(cur_date, "%Y-%m-%d")
-        #tu trzeba poprawić żeby sprawdzało czy nie nachodzi na inne rezerwacje ale już zasypiam
+        #tu trzeba poprawić żeby prawidłowo sprawdzało czy nie nachodzi na inne rezerwacje ale już zasypiam
         cur.execute("SELECT Robots.id, Models.name, Models.type FROM Robots"
             " INNER JOIN Models ON Robots.model_id=Models.id"
             " WHERE Robots.id IN (SELECT robot_id FROM Reservations WHERE "
