@@ -1,4 +1,12 @@
 import sqlite3
+import os
+import shutil
+import time
+import threading
+
+
+BACKUP_FOLDER = "backups"
+MAX_BACKUPS = 5  # Maksymalna liczba backupów
 
 #połączenie z bazą
 def connect(name):
@@ -238,5 +246,44 @@ def get_robot_types(conn):
         return []
 
 
+def create_backup(db_name):
+    if not os.path.exists(BACKUP_FOLDER):
+        os.makedirs(BACKUP_FOLDER)
+
+    # Tworzenie nowego backupu
+    backup_file = os.path.join(BACKUP_FOLDER, f"{db_name}_backup_{int(time.time())}.db")
+    shutil.copyfile(db_name, backup_file)
+    print(f"Backup utworzony: {backup_file}")
+
+    # Zarządzanie liczbą backupów
+    backups = sorted(
+        [os.path.join(BACKUP_FOLDER, f) for f in os.listdir(BACKUP_FOLDER) if f.startswith(db_name)],
+        key=os.path.getctime
+    )
+
+    if len(backups) > MAX_BACKUPS:
+        oldest_backup = backups[0]  # Najstarszy backup
+        os.remove(oldest_backup)  # Usunięcie najstarszego backupu
+        print(f"Usunięto najstarszy backup: {oldest_backup}")
 
 
+def backup_scheduler(db_name):
+    while True:
+        create_backup(db_name)
+        time.sleep(600)  # 10 minut w sekundach
+
+
+def disaster_recovery(db_name):
+    backups = [f for f in os.listdir(BACKUP_FOLDER) if f.startswith(db_name)]
+    if not backups:
+        print("Brak backupów do przywrócenia.")
+        return
+
+    backups.sort(reverse=True)  # Najnowszy backup
+    latest_backup = os.path.join(BACKUP_FOLDER, backups[0])
+
+    try:
+        shutil.copyfile(latest_backup, db_name)
+        print(f"Baza danych przywrócona z backupu: {latest_backup}")
+    except Exception as e:
+        print(f"Błąd podczas przywracania bazy danych: {e}")

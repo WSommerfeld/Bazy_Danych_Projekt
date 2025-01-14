@@ -11,9 +11,13 @@ DATA_BASE = "test7.db"
 # Funkcja uruchamiająca GUI
 def start_gui():
     root = tk.Tk()
-    app = RobotRentalApp(root)
-    root.mainloop()
+    # Połączenie z bazą danych
+    db_connection = db.connect(DATA_BASE)  # Tworzenie połączenia do bazy danych
+    is_admin = False  # Domyślnie użytkownik nie jest administratorem
 
+    # Tworzenie głównego okna aplikacji
+    app = RobotRentalApp(root, db_connection, is_admin)
+    root.mainloop()
 
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
@@ -93,7 +97,7 @@ class RobotRentalApp:
         self.__del__()
         self.root.destroy()
         import entry
-        entry.entry()
+        entry.Entry()
 
 
 
@@ -312,4 +316,7 @@ class RobotRentalApp:
         save_button = tk.Button(edit_window, text="Zapisz zmiany", command=save_changes)
         save_button.pack(pady=10)
     def __del__(self):
-        self.conn.close()  # Zamknięcie połączenia z bazą danych
+        if hasattr(self, "conn") and self.conn:
+            self.conn.close()  # Zamknięcie połączenia z bazą danych
+        #self.conn.close()  # Zamknięcie połączenia z bazą danych
+        #tutaj cos
