@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="53c7b037-80f4-4479-9d04-2baa2efa89f4" name="Changes" comment="11" />
+    <list default="true" id="53c7b037-80f4-4479-9d04-2baa2efa89f4" name="Changes" comment="11">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.venv/rental_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/.venv/rental_window.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -152,7 +155,7 @@
     <SUITE FILE_PATH="coverage/Bazy_Danych_Projekt$entry.coverage" NAME="entry Coverage Results" MODIFIED="1736728093113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
     <SUITE FILE_PATH="coverage/Bazy_Danych_Projekt$dbbasic.coverage" NAME="dbbasic Coverage Results" MODIFIED="1736631475829" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
     <SUITE FILE_PATH="coverage/Bazy_Danych_Projekt$GUI.coverage" NAME="GUI Coverage Results" MODIFIED="1736643384795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
-    <SUITE FILE_PATH="coverage/Bazy_Danych_Projekt$main.coverage" NAME="main Coverage Results" MODIFIED="1736742232147" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
+    <SUITE FILE_PATH="coverage/Bazy_Danych_Projekt$main.coverage" NAME="main Coverage Results" MODIFIED="1736742352240" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
     <SUITE FILE_PATH="coverage/Bazy_Danych_Projekt$rental_window.coverage" NAME="rental_window Coverage Results" MODIFIED="1736740810813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
   </component>
 </project>

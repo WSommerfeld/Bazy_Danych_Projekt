@@ -88,7 +88,7 @@ class RentalWindow:
         cur_date=self.cal.get_date()
         cur_date = datetime.datetime.strptime(cur_date, '%m/%d/%y')
         cur_date=datetime.date.strftime(cur_date, "%Y-%m-%d")
-        
+
         cur.execute("SELECT Robots.id, Models.name, Models.type FROM Robots"
             " INNER JOIN Models ON Robots.model_id=Models.id"
             " WHERE Robots.id IN (SELECT robot_id FROM Reservations WHERE "
