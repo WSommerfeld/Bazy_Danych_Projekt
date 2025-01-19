@@ -12,8 +12,8 @@ DATA_BASE = "test7.db"
 def main():
 
 
-    db.indexmaker(db.connect(DATA_BASE))
-    db.availabilityrefresher(db.connect(DATA_BASE))
+    #db.indexmaker(db.connect(DATA_BASE))
+    #db.availabilityrefresher(db.connect(DATA_BASE))
     #GUI.start_gui()
     entry.entry()
 

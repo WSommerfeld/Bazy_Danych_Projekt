@@ -13,6 +13,7 @@ class RentalWindow:
         self.root = root
         self.is_admin = is_admin
         self.root.title("Wypożycz robota")
+        
         #zmiana wielkosci okna
         self.root.geometry("550x600")
         for widget in self.root.winfo_children():
@@ -65,6 +66,8 @@ class RentalWindow:
                        day=1)
 
         self.cal.place(x=250, y=50)
+        # Podłączenie aktualizacji dostępności robotów do zmiany daty w kalendarzu
+        self.cal.bind("<<CalendarSelected>>", lambda event: self.update_robot_availability())
 
         tk.Label(self.root, text="Czas trwania wypożyczenia (dni):").place(x=250, y=280)
         self.rental_duration_entry = tk.Entry(self.root)
@@ -113,14 +116,21 @@ class RentalWindow:
         cur_date = datetime.datetime.strptime(cur_date, '%m/%d/%y')
         cur_date=datetime.date.strftime(cur_date, "%Y-%m-%d")
 
-        cur.execute("SELECT Robots.id, Models.name, Models.type FROM Robots"
-            " INNER JOIN Models ON Robots.model_id=Models.id"
-            " WHERE  (Robots.id IN (SELECT robot_id FROM Reservations WHERE "
-            " end_date < '"+str(cur_date)+"' OR DATE('"+str(cur_date)+"', '"+str(duration)+" day')<start_date)"
-            "OR Robots.id NOT IN (SELECT robot_id FROM Reservations)) AND Robots.id IN"
-              " (SELECT robot_id FROM Availability WHERE status = 'Available' AND end_date>DATE('"+str(cur_date)+"', '"+str(duration)+" day') )")
-        self.available_robots = cur.fetchall()
+        cur.execute("""
+        SELECT DISTINCT Robots.id, Models.name, Models.type 
+        FROM Robots
+        INNER JOIN Models ON Robots.model_id = Models.id
+        INNER JOIN Availability ON Robots.id = Availability.robot_id
+        WHERE Availability.status = 'Available' 
+        AND Robots.id NOT IN (
+            SELECT robot_id 
+            FROM Reservations 
+            WHERE start_date < DATE(?, '+' || ? || ' day')  
+            AND end_date > ?                               
+        );
+         """, (cur_date, duration, cur_date))
 
+        self.available_robots = cur.fetchall()
         #próba odświeżenia
         robot_options = [f"{r[0]}: {r[1]} ({r[2]})" for r in self.available_robots]
         self.robot_var.set(robot_options[0] if robot_options else "Brak dostępnych robotów")
@@ -128,6 +138,44 @@ class RentalWindow:
         menu.delete(0, "end")
         for option in robot_options:
             menu.add_command(label=option, command=lambda value=option: self.robot_var.set(value))
+
+    def update_robot_availability(self):
+        """
+        Aktualizuje dostępność robotów w oparciu o aktualną datę (wybraną w kalendarzu).
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute("""
+                UPDATE Availability
+                SET status = 'Available'
+                WHERE status = 'Unavailable'
+                AND end_date < DATE('now');  -- Sprawdza, czy data zakończenia rezerwacji już minęła
+            """)
+            self.conn.commit()
+            print("Dostępność robotów została zaktualizowana na podstawie aktualnej daty.")
+            self.refresh_available_robots()  # Odśwież listę dostępnych robotów
+        except Exception as e:
+            print(f"Błąd podczas aktualizacji dostępności robotów: {e}")
+
+    def refresh_available_robots(self):
+        """
+        Odświeża listę dostępnych robotów.
+        """
+        cur = self.conn.cursor()
+        cur.execute("SELECT Robots.id, Models.name, Models.type FROM Robots"
+                    " INNER JOIN Models ON Robots.model_id=Models.id"
+                    " WHERE Robots.id NOT IN (SELECT robot_id FROM Reservations WHERE"
+                    " '2025-01-01' BETWEEN start_date AND end_date)")
+        self.available_robots = cur.fetchall()
+
+        # Aktualizacja menu wyboru robotów
+        robot_options = [f"{r[0]}: {r[1]} ({r[2]})" for r in self.available_robots]
+        self.robot_var.set(robot_options[0] if robot_options else "Brak dostępnych robotów")
+        menu = self.robot_menu["menu"]
+        menu.delete(0, "end")
+        for option in robot_options:
+            menu.add_command(label=option, command=lambda value=option: self.robot_var.set(value))
+
 
 
     #Cofnięcie się do głównego menu
@@ -140,35 +188,28 @@ class RentalWindow:
         root.mainloop()
 
     def submit_rental(self):
+        """
+        Obsługuje tworzenie nowej rezerwacji na podstawie danych wejściowych.
+        """
         cur = self.conn.cursor()
         robot_id = self.robot_var.get().split(":")[0]
         first_name = self.first_name_entry.get()
         last_name = self.last_name_entry.get()
         phone = self.phone_entry.get()
-        email=self.email_entry.get()
+        email = self.email_entry.get()
         rental_duration = self.rental_duration_entry.get()
 
-        start_date=self.cal.get_date()
+        # Pobranie i formatowanie daty rozpoczęcia
+        start_date = self.cal.get_date()
         start_date = datetime.datetime.strptime(start_date, '%m/%d/%y')
-        start_date=datetime.date.strftime(start_date, "%Y-%m-%d")
+        start_date = datetime.date.strftime(start_date, "%Y-%m-%d")
 
-
-        #Walidacja danych
-        if not (robot_id and first_name and last_name and rental_duration ):
+        # Walidacja danych wejściowych
+        if not (robot_id and first_name and last_name and rental_duration):
             messagebox.showerror("Błąd", "Wszystkie pola muszą być wypełnione.")
             return
 
-
-        #Walidacja imenia i nazwiska
-        if not first_name.isalpha() or not last_name.isalpha():
-            messagebox.showerror("Błąd", "Imię i nazwisko muszą zawierać tylko litery.")
-            return
-
-
-        # Walidacja ceny - musi być liczbą dodatnią
-
-
-        # Walidacja czasu trwania wypożyczenia - musi być liczbą dodatnią
+        # Walidacja czasu trwania wypożyczenia
         try:
             rental_duration = int(rental_duration)
             if rental_duration <= 0:
@@ -177,35 +218,48 @@ class RentalWindow:
             messagebox.showerror("Błąd", f"Niepoprawny czas trwania wypożyczenia: {e}")
             return
 
+        # Sprawdzenie, czy robot jest dostępny w zadanym terminie
+        cur.execute("""
+            SELECT robot_id 
+            FROM Reservations
+            WHERE robot_id = ? 
+            AND start_date < DATE(?, '+' || ? || ' day') 
+            AND end_date > ?;
+        """, (robot_id, start_date, rental_duration, start_date))
+        if cur.fetchone():
+            messagebox.showerror("Błąd", "Robot nie jest dostępny w wybranym terminie.")
+            return
+
+        # Dodanie klienta i rezerwacji
         try:
-            #zmiany~Lasak
-
-            customer_id=0
-            #klient już coś wypożyczał
-            if(db.execute(self.conn,"SELECT MAX(id) FROM CUSTOMERS WHERE telephone = '"+str(phone)+"'").fetchone()[0]==1):
-
-                customer_id=db.execute(self.conn,"SELECT id FROM CUSTOMERS WHERE telephone = '"+str(phone)+"'").fetchone()[0]
-
-            #pierwsze wypożyczenie
+            # Sprawdzenie, czy klient już istnieje
+            customer_id = db.execute(self.conn, "SELECT id FROM Customers WHERE telephone = ?", (phone,)).fetchone()
+            if not customer_id:
+                db.execute(self.conn, """
+                    INSERT INTO Customers (email, telephone, first_name, last_name) 
+                    VALUES (?, ?, ?, ?)
+                """, (email, phone, first_name, last_name))
+                customer_id = db.execute(self.conn, "SELECT id FROM Customers WHERE telephone = ?", (phone,)).fetchone()[0]
             else:
-                customer_id=db.execute(self.conn,"SELECT COUNT(telephone) FROM CUSTOMERS").fetchone()[0]+1
-                db.execute(self.conn,"INSERT INTO CUSTOMERS (id, email, telephone, first_name, last_name) VALUES "
-                                     "('"+str(customer_id)+"', '"+email+"', '"+phone+"'"
-                                     ", '"+first_name+"', '"+last_name+"')")
+                customer_id = customer_id[0]
 
-            #wstawienie rezerwacji
-            #automatycznie ustawia status platnosci na pending
-            #data startu ustawiana jako dzisiaj
-            #data konca dzisiaj+rental_duration
-            try:
-                reservation_id=db.execute(self.conn,"SELECT MAX(id) FROM RESERVATIONS").fetchone()[0]+1
-            except:
-                reservation_id=1
+            # Dodanie rezerwacji do tabeli Reservations
+            db.execute(self.conn, """
+                INSERT INTO Reservations (robot_id, customer_id, payment_status, start_date, end_date) 
+                VALUES (?, ?, 'Pending', ?, DATE(?, '+' || ? || ' day'));
+            """, (robot_id, customer_id, start_date, start_date, rental_duration))
 
-            db.execute(self.conn,"INSERT INTO RESERVATIONS"
-                       "(id,customer_id,robot_id,payment_status, start_date, end_date) VALUES "
-                        "("+str(reservation_id)+","+str(customer_id)+","+str(robot_id)+","
-                         " 'Pending', '"+str(start_date)+"', DATE('"+str(start_date)+"', '+"+str(rental_duration)+" day'))")
+            messagebox.showinfo("Sukces", "Robot został wypożyczony!")
+            self.back()
+
+        except Exception as e:
+            messagebox.showerror("Błąd", f"Nie udało się wypożyczyć robota: {e}")
+
+
+
+
+
+
 
 
 

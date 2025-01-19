@@ -14,20 +14,32 @@ def connect(name):
     return conn
 
 #wykonanie zapytania
-def execute(conn, query):
+def execute(conn, query, params=None):
+    """
+    Wykonuje zapytanie SQL z opcjonalnymi parametrami i zatwierdza zmiany w bazie danych.
+  
+    
+    """
     try:
-        cur = conn.cursor()
-        result = cur.execute(query)
-        conn.commit()
-        return result
-
-    except sqlite3.OperationalError as e1:
-        if "syntax error" in e1.args[0]:
-            print("Błąd w zapytaniu")
-        if "already exists" in e1.args[0]:
-            print("Tabela już istnieje!")
+        cur = conn.cursor()  # Tworzenie kursora do wykonania zapytania SQL
+        if params:
+            # Jeśli przekazano parametry, wykonaj zapytanie z użyciem placeholderów (?)
+            result = cur.execute(query, params)
         else:
-            print(e1.args[0])
+            # Jeśli nie ma parametrów, wykonaj zapytanie bez nich
+            result = cur.execute(query)
+        conn.commit()  # Zatwierdzenie zmian w bazie danych (np. INSERT, UPDATE, DELETE)
+        return result  # Zwrócenie obiektu kursora (przydatne dla SELECT)
+    except sqlite3.OperationalError as e1:
+        # Obsługa błędów SQL, np. błędów składni lub brakujących tabel
+        if "syntax error" in e1.args[0]:
+            print("Błąd w zapytaniu SQL. Sprawdź składnię zapytania.")
+        elif "already exists" in e1.args[0]:
+            print("Tabela już istnieje w bazie danych.")
+        else:
+            print(f"Błąd operacyjny SQLite: {e1.args[0]}")
+        return None  # Zwrócenie None w przypadku błędu
+
 
 def indexmaker(conn):
     execute(conn, "CREATE UNIQUE INDEX robot_id1 ON Robots(id)")

@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 import dbbasic as db
@@ -13,6 +14,7 @@ DATA_BASE = "test7.db"
 # Funkcja uruchamiająca GUI
 def start_gui():
     root = tk.Tk()
+    
     # Połączenie z bazą danych
     db_connection = db.connect(DATA_BASE)  # Tworzenie połączenia do bazy danych
     is_admin = False  # Domyślnie użytkownik nie jest administratorem
@@ -41,12 +43,28 @@ class RobotRentalApp:
         self.conn = db.connect(DATA_BASE)  # Połączenie z bazą danych
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.create_widgets()
+        
+
+        
+        
 
     # Zamykanie okna (nie działa nadal do końca)
     def close(self):
-        print("close")
-        self.__del__()
-        self.root.destroy()
+        """Obsługa zdarzenia zamknięcia okna."""
+        if messagebox.askokcancel("Quit", "Czy na pewno chcesz zamknąć aplikację?"):
+            try:
+                # Zamknięcie połączenia z bazą danych, jeśli istnieje
+                if hasattr(self, "conn") and self.conn:
+                    self.conn.close()
+                    print("Połączenie z bazą danych zostało zamknięte.")
+            except Exception as e:
+                    print(f"Błąd podczas zamykania połączenia z bazą danych: {e}")
+
+                # Zamknięcie okna aplikacji
+            self.root.destroy()
+
+                # Wymuszone zakończenie programu, aby upewnić się, że proces został zakończony
+            sys.exit(0)
 
     def create_widgets(self):
         # Menu główne
@@ -92,6 +110,27 @@ class RobotRentalApp:
         self.logout_button = tk.Button(self.root, text="Wyloguj się", command=self.logout
         )
         self.logout_button.pack(pady=10)
+   
+   
+    def update_robot_availability_on_start(conn):
+        """
+        Jednorazowa aktualizacja dostępności robotów przy uruchomieniu aplikacji.
+        :param conn: Obiekt połączenia z bazą danych.
+        """
+        try:
+            cur = conn.cursor()
+            # Zapytanie SQL aktualizujące dostępność robotów
+            cur.execute("""
+                UPDATE Availability
+                SET status = 'Available'  -- Ustaw status robota na 'Available' (dostępny)
+                WHERE status = 'Unavailable'  -- Rozważamy tylko roboty oznaczone jako 'Unavailable' (niedostępne)
+                AND reservation_end_date < DATE('now');  -- Sprawdzamy, czy data zakończenia rezerwacji jest wcześniejsza niż dzisiejsza data
+            """)
+            conn.commit()  # Zatwierdzenie zmian w bazie danych
+            print("Dostępność robotów została zaktualizowana przy starcie aplikacji.")  # Informacja o sukcesie
+        except Exception as e:
+            # Obsługa błędów, np. problemów z połączeniem do bazy danych
+            print(f"Błąd podczas aktualizacji dostępności robotów: {e}")
 
 
     def logout(self):
@@ -186,24 +225,108 @@ class RobotRentalApp:
             messagebox.showerror("Błąd bazy danych", f"Wystąpił błąd: {e}")
 
     def show_available_robots(self):
-        # Pobieranie dostępnych robotów
-        cur = self.conn.cursor()
-        cur.execute(
-            """
-            SELECT Robots.id, Robots.serial_number, Models.name AS model, Models.type 
-            FROM Robots 
-            INNER JOIN Models ON Robots.model_id = Models.id
-            """
-        )
+        """
+        Wyświetla wszystkie roboty wraz z możliwością zmiany ich dostępności za pomocą menu rozwijanego.
+        """
+        try:
+            # Pobieranie wszystkich robotów i ich statusów dostępności
+            cur = self.conn.cursor()
+            cur.execute("""
+                SELECT Robots.id, Robots.serial_number, Models.name AS model, Models.type, Availability.status 
+                FROM Robots 
+                INNER JOIN Models ON Robots.model_id = Models.id
+                INNER JOIN Availability ON Robots.id = Availability.robot_id
+            """)
+            robots = cur.fetchall()
 
+            if not robots:
+                messagebox.showinfo("Roboty", "Brak robotów w bazie.")
+                return
 
-        robots = cur.fetchall()
-        if robots:
-            robot_list = "\n".join([f"ID: {r[0]}, Model: {r[1]}, Typ: {r[2]}" for r in robots])
-            messagebox.showinfo("Dostępne roboty", robot_list)
-        else:
-            messagebox.showinfo("Dostępne roboty", "Brak dostępnych robotów w bazie.")
-    
+            # Tworzenie okna dialogowego dla robotów
+            robots_window = tk.Toplevel(self.root)
+            robots_window.title("Lista robotów")
+            robots_window.geometry("700x500")
+
+            # Nagłówek listy robotów
+            tk.Label(robots_window, text="ID | Numer Seryjny | Model | Typ | Status").pack(pady=10)
+            robots_listbox = tk.Listbox(robots_window, width=80)
+            robots_listbox.pack(pady=10)
+
+            # Wypełnienie listy robotów
+            for r in robots:
+                robots_listbox.insert(tk.END, f"ID: {r[0]}, Numer: {r[1]}, Model: {r[2]}, Typ: {r[3]}, Status: {r[4]}")
+
+            # Funkcja zmieniająca status dostępności robota
+            def change_availability():
+                selected_robot = robots_listbox.curselection()
+                if not selected_robot:
+                    messagebox.showerror("Błąd", "Proszę wybrać robota.")
+                    return
+
+                robot_data = robots[selected_robot[0]]
+                robot_id = robot_data[0]
+                current_status = robot_data[4]
+
+                # Okno do wyboru nowego statusu
+                status_window = tk.Toplevel(robots_window)
+                status_window.title(f"Zmień status dla robota ID {robot_id}")
+                status_window.geometry("300x150")
+
+                tk.Label(status_window, text=f"Aktualny status: {current_status}").pack(pady=10)
+                tk.Label(status_window, text="Wybierz nowy status:").pack(pady=5)
+
+                # Menu rozwijane dla statusów
+                status_var = tk.StringVar(status_window)
+                status_var.set(current_status)  # Ustawienie obecnego statusu jako domyślnego
+                status_menu = tk.OptionMenu(status_window, status_var, "Available", "Unavailable")
+                status_menu.pack(pady=5)
+
+                def save_status():
+                    new_status = status_var.get()
+                    if new_status == current_status:
+                        messagebox.showinfo("Informacja", "Status pozostał bez zmian.")
+                        status_window.destroy()
+                        return
+
+                    try:
+                        # Aktualizacja statusu dostępności w bazie danych
+                        cur.execute("UPDATE Availability SET status = ? WHERE robot_id = ?", (new_status, robot_id))
+                        self.conn.commit()
+                        messagebox.showinfo("Sukces", f"Status robota ID {robot_id} został zmieniony na {new_status}.")
+
+                        # Odświeżenie listy robotów
+                        robots_listbox.delete(0, tk.END)
+                        cur.execute("""
+                            SELECT Robots.id, Robots.serial_number, Models.name AS model, Models.type, Availability.status 
+                            FROM Robots 
+                            INNER JOIN Models ON Robots.model_id = Models.id
+                            INNER JOIN Availability ON Robots.id = Availability.robot_id
+                        """)
+                        updated_robots = cur.fetchall()
+                        for r in updated_robots:
+                            robots_listbox.insert(tk.END, f"ID: {r[0]}, Numer: {r[1]}, Model: {r[2]}, Typ: {r[3]}, Status: {r[4]}")
+                        status_window.destroy()
+
+                    except Exception as e:
+                        messagebox.showerror("Błąd", f"Nie udało się zmienić statusu robota: {e}")
+                        status_window.destroy()
+
+                # Przycisk do zapisania nowego statusu
+                save_button = tk.Button(status_window, text="Zapisz", command=save_status)
+                save_button.pack(pady=10)
+
+            # Przycisk do zmiany dostępności
+            change_status_button = tk.Button(robots_window, text="Zmień dostępność", command=change_availability)
+            change_status_button.pack(pady=10)
+
+            # Przycisk zamykający okno
+            close_button = tk.Button(robots_window, text="Zamknij", command=robots_window.destroy)
+            close_button.pack(pady=10)
+
+        except sqlite3.Error as e:
+            messagebox.showerror("Błąd bazy danych", f"Wystąpił błąd: {e}")
+
     
 
     def rent_robot(self):
@@ -322,3 +445,4 @@ class RobotRentalApp:
             self.conn.close()  # Zamknięcie połączenia z bazą danych
         #self.conn.close()  # Zamknięcie połączenia z bazą danych
         #tutaj cos
+    
