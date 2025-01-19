@@ -14,7 +14,7 @@ class ReservationsWindow:
         self.root.title("Rezerwacjami")
 
         # zmiana wielkosci okna
-        self.root.geometry("750x600")
+        self.root.geometry("750x400")
         for widget in self.root.winfo_children():
             widget.destroy()
 
@@ -25,7 +25,7 @@ class ReservationsWindow:
 
         cur.execute("SELECT  Customers.first_name, Customers.last_name, Customers.email, Customers.telephone,"
     " Models.name, Reservations.start_date, Reservations.end_date, Reservations.payment_status,"
-    " (julianday(Reservations.end_date) - julianday(Reservations.start_date))*Availability.price as Price FROM Customers"
+    " (julianday(Reservations.end_date) - julianday(Reservations.start_date))*Availability.price as Price, Reservations.id FROM Customers"
     " INNER JOIN Reservations ON Reservations.customer_id = Customers.id"
     " INNER JOIN Robots ON Reservations.robot_id = Robots.id"
     " INNER JOIN Models ON Robots.model_id = Models.id"
@@ -42,10 +42,18 @@ class ReservationsWindow:
 
         tk.Label(self.root, text="Rezerwacje: ").pack(pady=5)
         self.res_var = tk.StringVar(self.root)
-        res_options = [f"{r[0]} | {r[1]} | {r[2]} | {r[3]} | {r[4]} | {r[5]} | {r[6]} | {r[7]} | {r[8]} |" for r in self.res]
+        res_options = [f"{r[0]} | {r[1]} | {r[2]} | {r[3]} | {r[4]} | {r[5]} | {r[6]} | {r[7]} | {r[8]} zł| :{r[9]}" for r in self.res]
         self.res_menu=tk.OptionMenu(self.root, self.res_var, *res_options)
-        self.res_menu.place(x=30,y=50)
+        self.res_menu.place(x=50,y=70)
 
+        paid_button = tk.Button(self.root, text="Zapłacone", command=self.setpaid)
+        paid_button.place(x=235,y=300)
+
+        failed_button = tk.Button(self.root, text="Błąd płatności", command=self.setfailed)
+        failed_button.place(x=310,y=300)
+
+        del_button = tk.Button(self.root, text="Usuń rezerwację", command=self.setpaid)
+        del_button.place(x=410,y=300)
 
 
     #Cofnięcie się do głównego menu
@@ -57,3 +65,52 @@ class ReservationsWindow:
         GUI.RobotRentalApp(root, self.conn, self.is_admin)
         root.mainloop()
 
+
+    def refresh(self, id):
+        cur = self.conn.cursor()
+
+        cur.execute("SELECT  Customers.first_name, Customers.last_name, Customers.email, Customers.telephone,"
+                    " Models.name, Reservations.start_date, Reservations.end_date, Reservations.payment_status,"
+                    " (julianday(Reservations.end_date) - julianday(Reservations.start_date))*Availability.price as Price, Reservations.id FROM Customers"
+                    " INNER JOIN Reservations ON Reservations.customer_id = Customers.id"
+                    " INNER JOIN Robots ON Reservations.robot_id = Robots.id"
+                    " INNER JOIN Models ON Robots.model_id = Models.id"
+                    " INNER JOIN Availability ON Robots.id = Availability.robot_id")
+        self.res = cur.fetchall()
+
+        res_options = [f"{r[0]} | {r[1]} | {r[2]} | {r[3]} | {r[4]} | {r[5]} | {r[6]} | {r[7]} | {r[8]} zł| :{r[9]}" for r in self.res]
+        self.res_var.set(res_options[id] if res_options else "Brak Rezerwacji")
+        menu = self.res_menu["menu"]
+        menu.delete(0, "end")
+        for option in res_options:
+            menu.add_command(label=option, command=lambda value=option: self.res_var.set(value))
+
+
+    def setpaid(self):
+
+        idx=0
+        for i in self.res:
+            idx=idx+1
+            if i[0]==int(self.res_var.get().split(":")[1]):
+                break;
+        idx = idx - 1
+
+
+        id=self.res_var.get().split(":")[1]
+        db.execute(self.conn, "UPDATE Reservations SET payment_status='Paid' WHERE id="+id)
+
+        self.refresh(idx)
+
+    def setfailed(self):
+
+        idx = 0
+        for i in self.res:
+            idx = idx + 1
+            if i[0] == int(self.res_var.get().split(":")[1]):
+                break;
+        idx = idx - 1
+
+        id = self.res_var.get().split(":")[1]
+        db.execute(self.conn, "UPDATE Reservations SET payment_status='Failed' WHERE id=" + id)
+
+        self.refresh(idx)

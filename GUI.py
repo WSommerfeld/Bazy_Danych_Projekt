@@ -106,6 +106,7 @@ class RobotRentalApp:
     def register_user(self):
         register_window = tk.Toplevel(self.root)
         register_window.title("Rejestracja")
+        register_window.geometry("400x500")
 
         tk.Label(register_window, text="Login: ").pack(pady=10)
         login_entry = tk.Entry(register_window)
