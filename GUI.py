@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 import dbbasic as db
+from Reservations import ReservationsWindow
 from rental_window import RentalWindow
 from users_window import UsersWindow
 import bcrypt
@@ -211,8 +212,7 @@ class RobotRentalApp:
 
     def manage_reservations(self):
         # Zarządzanie rezerwacjami
-        #trzeba ustalić ostatecznie zmiany z availability i cenami i można rzeźbić
-        messagebox.showinfo("Zarządzaj rezerwacjami", "brak.")
+        ReservationsWindow(self.root,self.conn,self.is_admin)
 
     def manage_users(self):
         # Zarządzanie użytkownikami

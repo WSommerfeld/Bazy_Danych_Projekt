@@ -14,7 +14,7 @@ class RentalWindow:
         self.is_admin = is_admin
         self.root.title("Wypożycz robota")
         #zmiana wielkosci okna
-        self.root.geometry("600x800")
+        self.root.geometry("550x600")
         for widget in self.root.winfo_children():
             widget.destroy()
         self.create_widgets()
@@ -35,57 +35,57 @@ class RentalWindow:
 
         #powrót
         back_button = tk.Button(self.root, text="Wróć", command=self.back)
-        back_button.pack(pady=5)
+        back_button.place(x=30, y=20)
 
-        tk.Label(self.root, text="Dostępne roboty:").pack(pady=5)
+        tk.Label(self.root, text="Dostępne roboty:").place(x=30, y=80)
         self.robot_var = tk.StringVar(self.root)
         robot_options = [f"{r[0]}: {r[1]} ({r[2]})" for r in self.available_robots]
         self.robot_menu=tk.OptionMenu(self.root, self.robot_var, *robot_options)
-        self.robot_menu.pack(pady=5)
+        self.robot_menu.place(x=30, y=120)
 
-        tk.Label(self.root, text="Imię klienta:").pack(pady=5)
+        tk.Label(self.root, text="Imię klienta:").place(x=30, y=180)
         self.first_name_entry = tk.Entry(self.root)
-        self.first_name_entry.pack(pady=5)
+        self.first_name_entry.place(x=30, y=220)
 
-        tk.Label(self.root, text="Nazwisko klienta:").pack(pady=5)
+        tk.Label(self.root, text="Nazwisko klienta:").place(x=30, y=280)
         self.last_name_entry = tk.Entry(self.root)
-        self.last_name_entry.pack(pady=5)
+        self.last_name_entry.place(x=30, y=320)
 
-        tk.Label(self.root, text="Nr telefonu:").pack(pady=5)
+        tk.Label(self.root, text="Nr telefonu:").place(x=30, y=380)
         self.phone_entry= tk.Entry(self.root)
-        self.phone_entry.pack(pady=5)
+        self.phone_entry.place(x=30, y=420)
 
-        tk.Label(self.root, text="Adres email:").pack(pady=5)
+        tk.Label(self.root, text="Adres email:").place(x=30, y=480)
         self.email_entry= tk.Entry(self.root)
-        self.email_entry.pack(pady=5)
+        self.email_entry.place(x=30, y = 520)
 
-        tk.Label(self.root, text="Data wypożyczenia:").pack(pady=5)
+        tk.Label(self.root, text="Data wypożyczenia:").place(x=250, y=20)
         self.cal = tkcal.Calendar(self.root, selectmode='day',
                        year=2025, month=1,
                        day=1)
 
-        self.cal.pack(pady=5)
+        self.cal.place(x=250, y=50)
 
-        tk.Label(self.root, text="Czas trwania wypożyczenia (dni):").pack(pady=5)
+        tk.Label(self.root, text="Czas trwania wypożyczenia (dni):").place(x=250, y=280)
         self.rental_duration_entry = tk.Entry(self.root)
-        self.rental_duration_entry.pack(pady=5)
+        self.rental_duration_entry.place(x=250, y=320)
 
         date_button = tk.Button(self.root, text="Sprawdź dostępność w zadanym terminie", command=self.datecheck)
-        date_button.pack(pady=5)
+        date_button.place(x=250, y=370)
 
         price_button = tk.Button(self.root, text="Sprawdź cenę", command=self.pricecheck)
-        price_button.pack(pady=5)
+        price_button.place(x=320, y=400)
 
 
 
         self.price_label = tk.Label(self.root,text="Cena(PLN): \n 0")
-        self.price_label.pack(pady=5)
+        self.price_label.place(x=330, y=430)
 
 
 
        
         submit_button = tk.Button(self.root, text="Wypożycz", command=self.submit_rental)
-        submit_button.pack(pady=10)
+        submit_button.place(x=330, y=480)
 
 
     def pricecheck(self):
