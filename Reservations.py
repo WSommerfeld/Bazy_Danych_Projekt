@@ -104,11 +104,14 @@ class ReservationsWindow:
     def setfailed(self):
 
         idx = 0
-        for i in self.res:
-            idx = idx + 1
-            if i[0] == int(self.res_var.get().split(":")[1]):
-                break
-        idx = idx - 1
+        try:
+            for i in self.res:
+                idx = idx + 1
+                if i[0] == int(self.res_var.get().split(":")[1]):
+                    break
+            idx = idx - 1
+        except IndexError:
+            idx=0
 
         id = self.res_var.get().split(":")[1]
         db.execute(self.conn, "UPDATE Reservations SET payment_status='Failed' WHERE id=" + id)
