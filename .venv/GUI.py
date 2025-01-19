@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog
 import dbbasic as db
 from rental_window import RentalWindow
+from users_window import UsersWindow
 import bcrypt
 import sqlite3
 import importlib
@@ -97,7 +98,7 @@ class RobotRentalApp:
         self.__del__()
         self.root.destroy()
         import entry
-        entry.Entry()
+        entry.entry()
 
 
 
@@ -215,7 +216,7 @@ class RobotRentalApp:
 
     def manage_users(self):
         # Zarządzanie użytkownikami
-        messagebox.showinfo("Zarządzaj użytkownikami", "brak.")
+        UsersWindow(self.root, self.conn,self.is_admin)
 
     def edit_robot(self):
         # Sprawdzamy, czy użytkownik ma rolę admin

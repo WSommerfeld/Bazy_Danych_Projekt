@@ -29,7 +29,18 @@ def execute(conn, query):
         else:
             print(e1.args[0])
 
+def indexmaker(conn):
+    execute(conn, "CREATE UNIQUE INDEX robot_id1 ON Robots(id)")
+    execute(conn, "CREATE  INDEX robot_id2 ON Availability(robot_id)")
+    execute(conn, "CREATE INDEX robot_id3 ON Reservations(robot_id)")
 
+def availabilityrefresher(conn):
+    execute(conn, "UPDATE Availability "
+                  "SET status = 'Available', end_date = DATE(CURRENT_DATE, '6 month') WHERE status = 'Unavailable' "
+                  "AND end_date<CURRENT_DATE")
+    execute(conn, "UPDATE Availability "
+                  "SET status = 'Unavailable', end_date = DATE(CURRENT_DATE, '1 month') WHERE status = 'Available' "
+                  "AND end_date<CURRENT_DATE")
 #utworzenie bazy
 def DataBaseInit(name):
     connection = connect(name)

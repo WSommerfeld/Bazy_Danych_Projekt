@@ -71,16 +71,40 @@ class RentalWindow:
         self.rental_duration_entry.pack(pady=5)
 
         date_button = tk.Button(self.root, text="Sprawdź dostępność w zadanym terminie", command=self.datecheck)
-        date_button.pack(pady=10)
+        date_button.pack(pady=5)
 
-        tk.Label(self.root, text="Cena (PLN):").pack(pady=5)
-        self.price_entry = tk.Entry(self.root)
-        self.price_entry.pack(pady=5)
+        price_button = tk.Button(self.root, text="Sprawdź cenę", command=self.pricecheck)
+        price_button.pack(pady=5)
+
+
+
+        self.price_label = tk.Label(self.root,text="Cena(PLN): \n 0")
+        self.price_label.pack(pady=5)
+
+
 
        
         submit_button = tk.Button(self.root, text="Wypożycz", command=self.submit_rental)
         submit_button.pack(pady=10)
 
+
+    def pricecheck(self):
+        duration = self.rental_duration_entry.get()
+        robot_id = self.robot_var.get().split(":")[0]
+
+        if(robot_id==""):
+            return;
+
+        price=0
+        try:
+            price = db.execute(self.conn,"SELECT PRICE FROM AVAILABILITY WHERE"
+                                     " robot_id = "+str(robot_id)+"").fetchone()[0]*int(duration)
+        except AttributeError:
+            price=0
+
+
+        price_var = "Cena(PLN): \n" + str(price)
+        self.price_label["text"] = price_var
 
     def datecheck(self):
         cur = self.conn.cursor()
@@ -91,9 +115,10 @@ class RentalWindow:
         
         cur.execute("SELECT Robots.id, Models.name, Models.type FROM Robots"
             " INNER JOIN Models ON Robots.model_id=Models.id"
-            " WHERE Robots.id IN (SELECT robot_id FROM Reservations WHERE "
+            " WHERE  (Robots.id IN (SELECT robot_id FROM Reservations WHERE "
             " end_date < '"+str(cur_date)+"' OR DATE('"+str(cur_date)+"', '"+str(duration)+" day')<start_date)"
-            "OR Robots.id NOT IN (SELECT robot_id FROM Reservations) ")
+            "OR Robots.id NOT IN (SELECT robot_id FROM Reservations)) AND Robots.id IN"
+              " (SELECT robot_id FROM Availability WHERE status = 'Available' AND end_date>DATE('"+str(cur_date)+"', '"+str(duration)+" day') )")
         self.available_robots = cur.fetchall()
 
         #próba odświeżenia
@@ -122,14 +147,14 @@ class RentalWindow:
         phone = self.phone_entry.get()
         email=self.email_entry.get()
         rental_duration = self.rental_duration_entry.get()
-        price = self.price_entry.get()
+
         start_date=self.cal.get_date()
         start_date = datetime.datetime.strptime(start_date, '%m/%d/%y')
         start_date=datetime.date.strftime(start_date, "%Y-%m-%d")
 
 
         #Walidacja danych
-        if not (robot_id and first_name and last_name and rental_duration and price):
+        if not (robot_id and first_name and last_name and rental_duration ):
             messagebox.showerror("Błąd", "Wszystkie pola muszą być wypełnione.")
             return
 
@@ -141,13 +166,7 @@ class RentalWindow:
 
 
         # Walidacja ceny - musi być liczbą dodatnią
-        try:
-            price = float(price)
-            if price <= 0:
-                raise ValueError("Cena musi być dodatnia.")
-        except ValueError as e:
-            messagebox.showerror("Błąd", f"Niepoprawna cena: {e}")
-            return
+
 
         # Walidacja czasu trwania wypożyczenia - musi być liczbą dodatnią
         try:
@@ -160,7 +179,7 @@ class RentalWindow:
 
         try:
             #zmiany~Lasak
-            #nie wiem co zrobić z price
+
             customer_id=0
             #klient już coś wypożyczał
             if(db.execute(self.conn,"SELECT MAX(id) FROM CUSTOMERS WHERE telephone = '"+str(phone)+"'").fetchone()[0]==1):
@@ -178,17 +197,18 @@ class RentalWindow:
             #automatycznie ustawia status platnosci na pending
             #data startu ustawiana jako dzisiaj
             #data konca dzisiaj+rental_duration
-            reservation_id=db.execute(self.conn,"SELECT MAX(id) FROM RESERVATIONS").fetchone()[0]+1
+            try:
+                reservation_id=db.execute(self.conn,"SELECT MAX(id) FROM RESERVATIONS").fetchone()[0]+1
+            except:
+                reservation_id=1
 
             db.execute(self.conn,"INSERT INTO RESERVATIONS"
                        "(id,customer_id,robot_id,payment_status, start_date, end_date) VALUES "
                         "("+str(reservation_id)+","+str(customer_id)+","+str(robot_id)+","
                          " 'Pending', '"+str(start_date)+"', DATE('"+str(start_date)+"', '+"+str(rental_duration)+" day'))")
-            print(start_date)
-            availability_id=db.execute(self.conn,"SELECT MAX(id) FROM AVAILABILITY").fetchone()[0]+1
-            db.execute(self.conn,"INSERT INTO Availability VALUES ("
-                                 " "+str(availability_id)+", "+str(robot_id)+",'Reserved'"
-                                  ",DATE('"+str(start_date)+"', '+"+str(rental_duration)+" day'),"+str(price)+" )")
+
+
+
 
             messagebox.showinfo("Sukces", "Robot został wypożyczony!")
             #tymczasowy mechanizm powrotu (nie wiem jak lepiej to zrobić)
