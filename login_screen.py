@@ -11,8 +11,7 @@ HASLA I LOGINY
 login: johndoe, password: password1,
 login: janedoe, password: password2,
 login: smithj, password: password3,
-login: admin, password: admin
-
+login: x, password: x
 
 """
 
@@ -23,6 +22,7 @@ class LoginScreen:
         self.root = root
         self.db_connection = db_connection  # Główne połączenie do bazy danych
         self.on_login_success = on_login_success  # Funkcja wywoływana po pomyślnym logowaniu
+       
         
         
         
@@ -83,5 +83,5 @@ class LoginScreen:
                 messagebox.showerror("Błąd", "Niepoprawne hasło.")
         else:
             messagebox.showerror("Błąd", "Użytkownik o podanym loginie nie istnieje.")
-
-
+    
+  

@@ -4,6 +4,7 @@ from tkinter import messagebox
 import tkcalendar as tkcal
 import datetime
 import dbbasic as db
+import GUI
 
 
 class ReservationsWindow:
@@ -52,13 +53,12 @@ class ReservationsWindow:
         failed_button = tk.Button(self.root, text="Błąd płatności", command=self.setfailed)
         failed_button.place(x=310,y=300)
 
-        del_button = tk.Button(self.root, text="Usuń rezerwację", command=self.setpaid)
+        del_button = tk.Button(self.root, text="Usuń rezerwację", command=self.deleteReservation)
         del_button.place(x=410,y=300)
 
 
     #Cofnięcie się do głównego menu
     def back(self):
-        import GUI
         for widget in self.root.winfo_children():
             widget.destroy()
         root=self.root
@@ -92,7 +92,7 @@ class ReservationsWindow:
         for i in self.res:
             idx=idx+1
             if i[0]==int(self.res_var.get().split(":")[1]):
-                break;
+                break
         idx = idx - 1
 
 
@@ -107,10 +107,56 @@ class ReservationsWindow:
         for i in self.res:
             idx = idx + 1
             if i[0] == int(self.res_var.get().split(":")[1]):
-                break;
+                break
         idx = idx - 1
 
         id = self.res_var.get().split(":")[1]
         db.execute(self.conn, "UPDATE Reservations SET payment_status='Failed' WHERE id=" + id)
 
         self.refresh(idx)
+    
+    def deleteReservation(self):
+    # Pobranie ID wybranej rezerwacji z menu rozwijanego
+        selected_reservation = self.res_var.get()
+        if not selected_reservation:
+            messagebox.showerror("Błąd", "Nie wybrano żadnej rezerwacji.")
+            return
+
+        # Wyodrębnienie ID rezerwacji
+        reservation_id = selected_reservation.split(":")[1]
+
+        # Pobranie ID robota powiązanego z rezerwacją
+        cur = self.conn.cursor()
+        cur.execute(
+            "SELECT robot_id FROM Reservations WHERE id = ?", (reservation_id,)
+        )
+        robot_id_row = cur.fetchone()
+
+        if not robot_id_row:
+            messagebox.showerror("Błąd", "Nie udało się pobrać ID robota dla rezerwacji.")
+            return
+
+        robot_id = robot_id_row[0]
+
+        # Rozpoczęcie transakcji: aktualizacja tabeli Availability i usunięcie rezerwacji
+        try:
+            # Aktualizacja statusu robota na "Available" (dostępny)
+            cur.execute(
+                "UPDATE Availability SET status = 'Available' WHERE robot_id = ?", (robot_id,)
+            )
+            # Usunięcie rezerwacji z tabeli Reservations
+            cur.execute(
+                "DELETE FROM Reservations WHERE id = ?", (reservation_id,)
+            )
+            self.conn.commit()  # Zatwierdzenie zmian w bazie danych
+            messagebox.showinfo("Sukces", "Rezerwacja została usunięta, a robot jest ponownie dostępny.")
+        except Exception as e:
+            self.conn.rollback()  # Cofnięcie transakcji w przypadku błędu
+            messagebox.showerror("Błąd", f"Nie udało się usunąć rezerwacji: {e}")
+            return
+
+        # Odświeżenie menu rozwijanego, aby odzwierciedlić zmiany
+        self.refresh(0)
+
+
+        
