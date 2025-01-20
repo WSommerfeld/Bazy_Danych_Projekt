@@ -4,21 +4,34 @@ import shutil
 import time
 import threading
 
+'''
+Moduł dbbasic zawiera podstawowe funkcje do operowania
+bazą danych oraz funkcje związane z tworzeniem kopii
+zapasowych i realizacją skryptu disaster recovery
+'''
 
-BACKUP_FOLDER = "backups"
+
+'''
+Zmienne używane przy zarządzaniu
+kopiami zapasowymi    
+'''
+BACKUP_FOLDER = "backups" #folder na backupy
 MAX_BACKUPS = 5  # Maksymalna liczba backupów
 
-#połączenie z bazą
+'''
+Połączenie z bazą danych
+'''
 def connect(name):
     conn = sqlite3.connect(name)
     return conn
 
-#wykonanie zapytania
+'''
+Wykonanie zapytania SQL przy 
+zadanym połączeniu z bazą danych
+'''
 def execute(conn, query, params=None):
     """
     Wykonuje zapytanie SQL z opcjonalnymi parametrami i zatwierdza zmiany w bazie danych.
-  
-    
     """
     try:
         cur = conn.cursor()  # Tworzenie kursora do wykonania zapytania SQL
@@ -40,20 +53,19 @@ def execute(conn, query, params=None):
             print(f"Błąd operacyjny SQLite: {e1.args[0]}")
         return None  # Zwrócenie None w przypadku błędu
 
-
+'''
+Tworzenie kluczowych indeksów
+'''
 def indexmaker(conn):
     execute(conn, "CREATE UNIQUE INDEX robot_id1 ON Robots(id)")
     execute(conn, "CREATE  INDEX robot_id2 ON Availability(robot_id)")
     execute(conn, "CREATE INDEX robot_id3 ON Reservations(robot_id)")
 
-def availabilityrefresher(conn):
-    execute(conn, "UPDATE Availability "
-                  "SET status = 'Available', end_date = DATE(CURRENT_DATE, '6 month') WHERE status = 'Unavailable' "
-                  "AND end_date<CURRENT_DATE")
-    execute(conn, "UPDATE Availability "
-                  "SET status = 'Unavailable', end_date = DATE(CURRENT_DATE, '1 month') WHERE status = 'Available' "
-                  "AND end_date<CURRENT_DATE")
-#utworzenie bazy
+
+'''
+Utworzenie pustej bazy danych
+i zwrócenie połączenia do niej
+'''
 def DataBaseInit(name):
     connection = connect(name)
     create_table_Models(connection)
@@ -64,20 +76,28 @@ def DataBaseInit(name):
     create_table_Customers(connection)
     create_table_Reservations(connection)
     return connection
-#print tabela
+
+'''
+Drukowanie tabeli zwróconych
+przez execute
+'''
 def printresult(result):
     for result in result:
         print(result)
 
 
-
+'''
+Utworzenie tabeli Models
+'''
 def create_table_Models(conn):
     execute(conn, "CREATE TABLE Models"
                   "(id INTEGER PRIMARY KEY AUTOINCREMENT,"
                   "name VARCHAR(50) NOT NULL,"
                   "type VARCHAR(50) NOT NULL CHECK(type IN('Industrial', 'Household', 'Garden')))")
 
-#robots create
+'''
+Utworzenie tabeli Robots
+'''
 def create_table_Robots(conn):
     execute(conn,"CREATE TABLE Robots"
                  " (id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -87,7 +107,9 @@ def create_table_Robots(conn):
                  " FOREIGN KEY (model_id) REFERENCES Models(id))")
 
 
-#Availability create
+'''
+Utworzenie tabeli Availability
+'''
 def create_table_Availability(conn):
     execute(conn, "CREATE TABLE Availability(id INTEGER PRIMARY KEY AUTOINCREMENT, "
                   " robot_id INTEGER NOT NULL, "
@@ -96,7 +118,9 @@ def create_table_Availability(conn):
                   "price DECIMAL(10, 2) NOT NULL,"
                   " FOREIGN KEY (robot_id) REFERENCES Robots(id))")
 
-#Functionalities create
+'''
+Utworzenie tabeli Functionalities
+'''
 def create_table_Functionalities(conn):
     execute(conn,"CREATE TABLE Functionalities "
                  "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -105,7 +129,9 @@ def create_table_Functionalities(conn):
                  "FOREIGN KEY (model_id) REFERENCES Models(id) )")
 
 
-#Reservations
+'''
+Utworzenie tabeli Reservations
+'''
 def create_table_Reservations(conn):
     execute(conn,"CREATE TABLE Reservations "
                  "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -117,7 +143,9 @@ def create_table_Reservations(conn):
                  "FOREIGN KEY (customer_ID) REFERENCES Customers(id),"
                  "FOREIGN KEY (robot_id) REFERENCES Robots(id))")
 
-#Users
+'''
+Utworzenie tabeli Users
+'''
 def create_table_Users(conn):
     execute(conn,"CREATE TABLE Users "
                  "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -128,8 +156,9 @@ def create_table_Users(conn):
                  "password_hash VARCHAR(255) NOT NULL,"
                  "role VARCHAR(50) NOT NULL)")
 
-#propozycja dodania tabeli klientów
-#wtedy trzeba zmienić foreign key w rezerwacjach
+'''
+Utworzenie tabeli Customers
+'''
 def create_table_Customers(conn):
     execute(conn,"CREATE TABLE Customers "
                  "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -137,123 +166,10 @@ def create_table_Customers(conn):
                  "telephone VARCHAR(50) UNIQUE NOT NULL,"
                  "first_name VARCHAR(50) NOT NULL,"
                  "last_name VARCHAR(50) NOT NULL)")
-#select
-def select(conn, col, table):
-    cur = conn.cursor()
-    try:
-        res = cur.execute("SELECT " + col + " FROM " + table)
 
-    except sqlite3.OperationalError as e:
-        if "no such column" in e.args[0]:
-            print("Nie ma takiej kolumny")
-
-    #zwraca tablice wszystkich rekordów
-    try:
-        return res.fetchall()
-    except UnboundLocalError:
-        return None
-
-#select where
-def selectWhere(conn, col, table, where):
-    cur = conn.cursor()
-    try:
-        res = cur.execute("SELECT " + col + " FROM " + table+" WHERE " + where)
-
-    except sqlite3.OperationalError as e:
-        if "no such column" in e.args[0]:
-            print("Nie ma takiej kolumny")
-
-    #zwraca tablice wszystkich rekordów where where
-    try:
-        return res.fetchall()
-    except UnboundLocalError:
-        return None
-
-
-#robots insert
-def insertRobots(conn, model, type, warranty_number):
-    execute(conn,"insert into robots values("+str(nextid(conn,"Robots")) +", '" +model + "', '" +type+ "', '"+ str(serialnumber(conn))+"', '"+warranty_number+"')")
-
-#oblicznie id
-def nextid(conn,table):
-    #można to udprawnić o cofanie numerów ale nwm czy jest sens
-    if(table == "Robots"):
-        if(select(conn,"count(robot_id)",table)[0][0]>0):
-            id = select(conn, "max(robot_id)", table)[0][0]+1
-        else:
-            id=0
-    if(table == "Availability"):
-        if (select(conn, "count(robot_id)",table)[0][0] != None):
-            id = select(conn, "max(availability_id)", table)[0][0]+1
-        else:
-            id = 0
-    return id
-
-#symulacja nr seryjnego
-def serialnumber(conn):
-    #tymczasowo
-    #wsm to można by to ręcznie wprowadzać ale do testowania aktualnie to
-    #zbyt duży ból w dupie
-    if select(conn, "count(robot_id)", "Robots")[0][0]>0:
-        num = select(conn, "max(robot_id)", "Robots")[0][0] + 2137420+1
-    else:
-        num=2137420
-    return num
-
-#model
-def RgetModel(conn, id):
-    model = execute(conn,"select model from Robots where robot_id="+ str(id)).fetchone()[0]
-    return model
-
-# typ
-def RgetType(conn, id):
-    type = execute(conn,"select type from Robots where robot_id=" + str(id)).fetchone()[0]
-    return type
-
-# numer seryjny
-def RgetSerial(conn, id):
-    serial = execute(conn,"select serial_number from Robots where robot_id=" + str(id)).fetchone()[0]
-    return serial
-
-#numer gwarancji
-def RgetWarranty(conn, id):
-    warranty=execute(conn,"select warranty_number from Robots where robot_id=" + str(id)).fetchone()[0]
-    return warranty
-
-#ilosc robotów
-def RgetQuantity(conn):
-    q=select(conn, "count(robot_id)","Robots")
-    return q[0][0]
-
-#usun robota
-def DeleteRobot(conn, id):
-    execute(conn,"delete from Robots where robot_id=" + str(id))
-#znajdz id robotów o col == value
-def RgetWhere(conn, col,value,):
-    if type(value) == str:
-        result = execute(conn,"select robot_id from Robots where "+col+"="+"'"+value+"'")
-    else:
-        result = execute(conn,"select robot_id from Robots where "+col+"="+str(value))
-    return result
-#ilosc robotów o zadanym parametrze
-def RgetQWhere(conn, col,value,):
-    if type(value) == str:
-        res = execute(conn,"select count(robot_id) from (select robot_id from Robots where "+col+"="+"'"+value+"')")
-    else:
-        res = execute(conn,"select count(robot_id) from (select robot_id from Robots where "+col+"="+str(value))
-
-    return res.fetchone()[0]
-
-#wyczyszczenie tabeli Robots
-def ClearRobots(conn):
-    for i in range(RgetQuantity(conn)):
-        DeleteRobot(conn,i)
-
-
-def insertAvailability(conn, robot_id, status, end_date, price):
-    execute(conn, "insert into Availability values("+str(nextid(conn, "Availability"))+", "+str(robot_id)+", '"+status+"', "+end_date+ ", "+str(price)+") ")
-
-
+'''
+Zwrócenie typów robotów
+'''
 def get_robot_types(conn):
     try:
         cur = conn.cursor()
@@ -268,7 +184,9 @@ def get_robot_types(conn):
         print("Error retrieving robot types:", e)
         return []
 
-
+'''
+Utworzenie kopii zapasowej bazy danych
+'''
 def create_backup(db_name):
     if not os.path.exists(BACKUP_FOLDER):
         os.makedirs(BACKUP_FOLDER)
@@ -289,13 +207,17 @@ def create_backup(db_name):
         os.remove(oldest_backup)  # Usunięcie najstarszego backupu
         print(f"Usunięto najstarszy backup: {oldest_backup}")
 
-
+'''
+Zarządzanie tworzeniem kopii zapasowych
+'''
 def backup_scheduler(db_name):
     while True:
         create_backup(db_name)
         time.sleep(600)  # 10 minut w sekundach
 
-
+'''
+Odtworzenie bazy danych z kopii zapasowej
+'''
 def disaster_recovery(db_name):
     backups = [f for f in os.listdir(BACKUP_FOLDER) if f.startswith(db_name)]
     if not backups:

@@ -13,8 +13,8 @@ def main():
 
 
     #db.indexmaker(db.connect(DATA_BASE))
-    #db.availabilityrefresher(db.connect(DATA_BASE))
-    #GUI.start_gui()
+
+
     entry.entry()
 
 if __name__ == "__main__":
