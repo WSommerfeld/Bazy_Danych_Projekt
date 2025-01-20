@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import bcrypt
+import sys
 
 
 
@@ -22,7 +23,7 @@ class LoginScreen:
         self.root = root
         self.db_connection = db_connection  # Główne połączenie do bazy danych
         self.on_login_success = on_login_success  # Funkcja wywoływana po pomyślnym logowaniu
-       
+        self.root.protocol("WM_DELETE_WINDOW", self.close)
         
         
         
@@ -46,6 +47,23 @@ class LoginScreen:
         # Przycisk logowania
         self.login_button = tk.Button(root, text="Zaloguj", command=self.check_login)
         self.login_button.pack(pady=10)
+
+    def close(self):
+        """Obsługa zdarzenia zamknięcia okna."""
+
+        try:
+            # Zamknięcie połączenia z bazą danych, jeśli istnieje
+            if hasattr(self, "conn") and self.conn:
+                self.conn.close()
+                print("Połączenie z bazą danych zostało zamknięte.")
+        except Exception as e:
+            print(f"Błąd podczas zamykania połączenia z bazą danych: {e}")
+
+        # Zamknięcie okna aplikacji
+        self.root.destroy()
+
+        # Wymuszone zakończenie programu, aby upewnić się, że proces został zakończony
+        sys.exit(0)
 
     def check_login(self):
         # Pobranie danych z pól
