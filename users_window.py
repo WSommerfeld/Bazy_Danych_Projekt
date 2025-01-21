@@ -2,6 +2,7 @@ import tkinter
 import tkinter as tk
 from tkinter import messagebox
 import dbbasic as db
+import menu
 
 '''
 Moduł users_window.py odpowiada za przełączanie między
@@ -53,11 +54,11 @@ class UsersWindow:
 
     #Cofnięcie się do głównego menu
     def back(self):
-        import GUI
+        
         for widget in self.root.winfo_children():
             widget.destroy()
         root=self.root
-        GUI.RobotRentalApp(root, self.conn, self.is_admin)
+        menu.RobotRentalApp(root, self.conn, self.is_admin)
         root.mainloop()
 
     #nadanie praw użytkownika

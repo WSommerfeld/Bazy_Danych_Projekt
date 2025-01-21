@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import dbbasic as db
 from login_screen import LoginScreen
-from GUI import RobotRentalApp
+from menu import RobotRentalApp
 
 DATA_BASE = "test7.db"
 

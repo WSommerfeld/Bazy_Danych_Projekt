@@ -4,6 +4,7 @@ from tkinter import messagebox
 import tkcalendar as tkcal
 import datetime
 import dbbasic as db
+import menu
 
 '''
 Moduł rental_window.py umożliwia przełączanie między menu głównym,
@@ -100,7 +101,7 @@ class RentalWindow:
         robot_id = self.robot_var.get().split(":")[0]
 
         if(robot_id==""):
-            return;
+            return
 
         price=0
         try:
@@ -186,11 +187,11 @@ class RentalWindow:
 
     #Cofnięcie się do głównego menu
     def back(self):
-        import GUI
+        
         for widget in self.root.winfo_children():
             widget.destroy()
         root=self.root
-        GUI.RobotRentalApp(root, self.conn, self.is_admin)
+        menu.RobotRentalApp(root, self.conn, self.is_admin)
         root.mainloop()
 
     def submit_rental(self):
