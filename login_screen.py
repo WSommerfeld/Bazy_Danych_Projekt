@@ -101,7 +101,7 @@ class LoginScreen:
                 self.root.withdraw()  # Zamknięcie okna logowania
                 self.on_login_success(role)  # Przekazanie roli do głównego programu
                 
-                
+
             else:
                 messagebox.showerror("Błąd", "Niepoprawne hasło.")
         else:
