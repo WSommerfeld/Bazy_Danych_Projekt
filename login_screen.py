@@ -13,6 +13,8 @@ login: johndoe, password: password1,
 login: janedoe, password: password2,
 login: smithj, password: password3,
 login: x, password: x
+login: Jan03, password: 12345
+login: AnnaN, password: 12345
 
 """
 

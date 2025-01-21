@@ -98,15 +98,14 @@ class UsersWindow:
             x = users_options[id]
         except TypeError:
             id=0
-        print(id)
+
         if(tkinter.messagebox.askokcancel(title="Usuwanie użytkownika", message = "Czy na pewno"
             " chcesz usunąć użytkownika "+str(self.users_var.get().split("|")[0])+" ?")):
-            print("usuwam")
-        else:
-            print("nie usuwam")
-        db.execute(self.conn, "DELETE FROM users WHERE "
+
+
+            db.execute(self.conn, "DELETE FROM users WHERE "
                               "id =" + str(self.users_var.get().split(":")[0]) + " ")
-        self.refresh(id)
+            self.refresh(id)
 
 
     def refresh(self,id):
