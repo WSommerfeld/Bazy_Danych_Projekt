@@ -1,19 +1,8 @@
-import tkinter as tk
-from tkinter import messagebox
-import dbbasic as db
-import GUI
-from login_screen import LoginScreen
-from GUI import RobotRentalApp
-import entry
-import threading
 
-DATA_BASE = "test7.db"
+import entry
+
 
 def main():
-
-
-    #db.indexmaker(db.connect(DATA_BASE))
-
 
     entry.entry()
 

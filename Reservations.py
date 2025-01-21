@@ -97,7 +97,7 @@ class ReservationsWindow:
 
 
         id=self.res_var.get().split(":")[1]
-        db.execute(self.conn, "UPDATE Reservations SET payment_status='Paid' WHERE id="+id)
+        db.execute(self.conn, "UPDATE Reservations SET payment_status='Paid' WHERE id=?",id)
 
         self.refresh(idx)
 
@@ -114,7 +114,7 @@ class ReservationsWindow:
             idx=0
 
         id = self.res_var.get().split(":")[1]
-        db.execute(self.conn, "UPDATE Reservations SET payment_status='Failed' WHERE id=" + id)
+        db.execute(self.conn, "UPDATE Reservations SET payment_status='Failed' WHERE id=?",id)
 
         self.refresh(idx)
     

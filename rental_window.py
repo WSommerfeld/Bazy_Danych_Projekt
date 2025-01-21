@@ -101,7 +101,7 @@ class RentalWindow:
         price=0
         try:
             price = db.execute(self.conn,"SELECT PRICE FROM AVAILABILITY WHERE"
-                                     " robot_id = "+str(robot_id)+"").fetchone()[0]*int(duration)
+                                     " robot_id = ?", str(robot_id)).fetchone()[0]*int(duration)
         except AttributeError:
             price=0
         except ValueError:
