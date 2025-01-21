@@ -412,22 +412,22 @@ class RobotRentalApp:
                 #model o zadanym typie (w ograniczeniu industrial, household, garden)
 
                 #model jest w bazie
-                if(db.execute(self.conn,"SELECT COUNT(name) FROM models WHERE name = '"+new_model+"'").fetchone()[0]>0):
-                    print("stary")
-                    #id wprowadzonego modelu
-                    model_id=db.execute(self.conn,"SELECT id FROM models WHERE name = '"+new_model+"'").fetchone()[0]
+                if(db.execute(self.conn,"SELECT COUNT(name) FROM models WHERE name = ? ", (new_model,)).fetchone()[0]>0):
 
-                    db.execute(self.conn,"UPDATE Robots SET model_id = '"+str(model_id)+"' WHERE id = '"+str(robot_id)+"'")
+                    #id wprowadzonego modelu
+                    model_id=db.execute(self.conn,"SELECT id FROM models WHERE name = ?", (new_model,)).fetchone()[0]
+
+                    db.execute(self.conn,"UPDATE Robots SET model_id = ? WHERE id = ?",(model_id,robot_id))
 
                     messagebox.showinfo("Sukces", "Dane robota zostały zaktualizowane.")
                     edit_window.destroy()  # Zamknięcie okna edycji
                 else:
                     #id nowego modelu
-                    print("nowy")
+
                     new_id = db.execute(self.conn,"SELECT COUNT(id) FROM Models").fetchone()[0] + 1
 
                     db.execute(self.conn,"INSERT INTO models (id, name, type)"
-                                         " VALUES("+str(new_id)+", '"+str(new_model)+"', '"+str(new_type)+"')")
+                                         " VALUES(?, ?, ?)",(new_id,new_model,new_type))
 
                     db.execute(self.conn, "UPDATE Robots SET model_id = '"+str(new_id)+"' WHERE id = '"+str(robot_id)+"'")
 
