@@ -104,6 +104,8 @@ class RentalWindow:
                                      " robot_id = "+str(robot_id)+"").fetchone()[0]*int(duration)
         except AttributeError:
             price=0
+        except ValueError:
+            price=0
 
 
         price_var = "Cena(PLN): \n" + str(price)
