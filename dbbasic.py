@@ -5,7 +5,7 @@ import time
 import threading
 
 '''
-Moduł dbbasic zawiera podstawowe funkcje do operowania
+Moduł dbbasic.py zawiera podstawowe funkcje do operowania
 bazą danych oraz funkcje związane z tworzeniem kopii
 zapasowych i realizacją skryptu disaster recovery
 '''
