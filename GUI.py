@@ -9,6 +9,11 @@ import bcrypt
 import sqlite3
 import importlib
 
+'''
+Moduł GUI.py odpowiada za utworzenie menu głównego aplikacji
+i obsługę niektórych opcji tego menu
+'''
+
 DATA_BASE = "test7.db"
 
 # Funkcja uruchamiająca GUI
@@ -429,7 +434,7 @@ class RobotRentalApp:
                     db.execute(self.conn,"INSERT INTO models (id, name, type)"
                                          " VALUES(?, ?, ?)",(new_id,new_model,new_type))
 
-                    db.execute(self.conn, "UPDATE Robots SET model_id = '"+str(new_id)+"' WHERE id = '"+str(robot_id)+"'")
+                    db.execute(self.conn, "UPDATE Robots SET model_id = ? WHERE id = ?", (new_id,robot_id))
 
                     messagebox.showinfo("Sukces", "Dane robota zostały zaktualizowane. Dodano nowy model.")
                     edit_window.destroy()  # Zamknięcie okna edycji
@@ -444,5 +449,5 @@ class RobotRentalApp:
         if hasattr(self, "conn") and self.conn:
             self.conn.close()  # Zamknięcie połączenia z bazą danych
         #self.conn.close()  # Zamknięcie połączenia z bazą danych
-        #tutaj cos
+
     

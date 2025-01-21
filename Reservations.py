@@ -1,11 +1,12 @@
-import tkinter
 import tkinter as tk
 from tkinter import messagebox
-import tkcalendar as tkcal
-import datetime
 import dbbasic as db
 import GUI
 
+'''
+Moduł Reservations.py odpowiada za przełączanie między głównym menu,
+a menu obsługi rezerwacji
+'''
 
 class ReservationsWindow:
     def __init__(self, root, conn, is_admin):

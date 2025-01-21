@@ -1,10 +1,12 @@
 import tkinter
 import tkinter as tk
 from tkinter import messagebox
-import tkcalendar as tkcal
-import datetime
 import dbbasic as db
 
+'''
+Moduł users_window.py odpowiada za przełączanie między
+menu głównym, a menu zarządzania kontami użytkowników
+'''
 
 class UsersWindow:
     def __init__(self, root, conn, is_admin):

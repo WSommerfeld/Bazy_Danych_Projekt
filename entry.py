@@ -6,6 +6,11 @@ from GUI import RobotRentalApp
 
 DATA_BASE = "test7.db"
 
+'''
+Moduł entry.py odpowiada za uruchamianie okna logowania
+oraz nawiązywanie połączenia z bazą danych
+w roli użytkownika lub administrastora
+'''
 
 def entry():
     # Połączenie bazowe do weryfikacji logowania

@@ -1,6 +1,4 @@
-
 import entry
-
 
 def main():
 

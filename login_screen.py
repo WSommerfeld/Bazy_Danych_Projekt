@@ -16,6 +16,11 @@ login: x, password: x
 
 """
 
+'''
+Moduł login_screen.py odpowiada za utworzenie
+i obsługę okna logowania
+'''
+
 
 class LoginScreen:
     def __init__(self, root,db_connection, on_login_success):
