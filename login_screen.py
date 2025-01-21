@@ -97,11 +97,11 @@ class LoginScreen:
             # Weryfikacja hasła
             if bcrypt.checkpw(password.encode("utf-8"), stored_password_hash):
                 messagebox.showinfo("Sukces", f"Zalogowano jako {role}.")
-                print("Przed usunieciem")
+
                 self.root.withdraw()  # Zamknięcie okna logowania
                 self.on_login_success(role)  # Przekazanie roli do głównego programu
                 
-                print("Okno usuniete")
+                
             else:
                 messagebox.showerror("Błąd", "Niepoprawne hasło.")
         else:

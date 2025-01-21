@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="53c7b037-80f4-4479-9d04-2baa2efa89f4" name="Changes" comment="11">
-      <change beforePath="$PROJECT_DIR$/GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reservations.py" beforeDir="false" afterPath="$PROJECT_DIR$/Reservations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/entry.py" beforeDir="false" afterPath="$PROJECT_DIR$/entry.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/login_screen.py" beforeDir="false" afterPath="$PROJECT_DIR$/login_screen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rental_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/rental_window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/users_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_window.py" afterDir="false" />
-    </list>
+    <list default="true" id="53c7b037-80f4-4479-9d04-2baa2efa89f4" name="Changes" comment="11" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -97,7 +89,7 @@
       <workItem from="1737122982078" duration="17000" />
       <workItem from="1737246035230" duration="12339000" />
       <workItem from="1737310298432" duration="8944000" />
-      <workItem from="1737420043530" duration="2166000" />
+      <workItem from="1737420043530" duration="2294000" />
     </task>
     <task id="LOCAL-00001" summary="1">
       <option name="closed" value="true" />
